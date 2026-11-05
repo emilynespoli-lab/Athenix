@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: athenix
+      POSTGRES_USER: athenix
+      POSTGRES_PASSWORD: ${ATHENIX_DB_PASSWORD:?Configure ATHENIX_DB_PASSWORD no ambiente}
+    volumes:
+      - athenix-db:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U athenix -d athenix"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment: &application_environment
+      ATHENIX_DATABASE_URL: postgresql+psycopg://athenix:${ATHENIX_DB_PASSWORD}@db:5432/athenix
+      ATHENIX_API_KEY: ${ATHENIX_API_KEY:-}
+      ATHENIX_MODEL: ${ATHENIX_MODEL:-}
+      ATHENIX_INPUT_USD_M: ${ATHENIX_INPUT_USD_M:-}
+      ATHENIX_OUTPUT_USD_M: ${ATHENIX_OUTPUT_USD_M:-}
+      ATHENIX_PRICE_SOURCE: ${ATHENIX_PRICE_SOURCE:-}
+      ATHENIX_PRICE_DATE: ${ATHENIX_PRICE_DATE:-}
+    depends_on:
+      db:
+        condition: service_healthy
+  worker:
+    build: .
+    command: ["python", "-m", "athenix", "worker"]
+    environment: *application_environment
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  athenix-db:

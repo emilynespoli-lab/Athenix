@@ -1,0 +1,5 @@
+# Opcional: OCR e análise de layout da PoC (scripts/docling_ocr.py). Não entra no CI.
+# Instale em um venv separado, em caminho CURTO (ver docs/docling.md), com torch só para CPU.
+--extra-index-url https://download.pytorch.org/whl/cpu
+docling>=2.147,<3
+onnxruntime>=1.20,<2

@@ -1,0 +1,12 @@
+{
+  "url": "https://www.gov.br/aneel/pt-br/acesso-a-informacao/perguntas-frequentes/faq-resolucao-normativa-no-1-137-2025/",
+  "acquired_at_utc": "2026-11-05T03:28:22.780549+00:00",
+  "sha256": "e2105b35e7c4dfd7a0e51fda93b9ddce418de8ca8478488f02218b7f5b7489d5",
+  "bytes": 569095,
+  "role": "clarification",
+  "robots_status": 200,
+  "robots_sha256": "665417a8e7d2184fe1effefd6a242111682a9e59e94c4aa8af17e9c5487a090a",
+  "robots_allowed": true,
+  "file": ".local/public/e2105b35e7c4dfd7a0e51fda93b9ddce418de8ca8478488f02218b7f5b7489d5.html",
+  "source_type": "official_public_new_acquisition"
+}

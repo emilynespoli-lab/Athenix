@@ -1,0 +1,587 @@
+[
+  {
+    "name": "alembic",
+    "version": "1.20.1",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://alembic.sqlalchemy.org",
+      "Documentation, https://alembic.sqlalchemy.org/en/latest/",
+      "Changelog, https://alembic.sqlalchemy.org/en/latest/changelog.html",
+      "Source, https://github.com/sqlalchemy/alembic/",
+      "Issue Tracker, https://github.com/sqlalchemy/alembic/issues/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "annotated-doc",
+    "version": "0.0.5",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/fastapi/annotated-doc",
+      "Documentation, https://github.com/fastapi/annotated-doc",
+      "Repository, https://github.com/fastapi/annotated-doc",
+      "Issues, https://github.com/fastapi/annotated-doc/issues",
+      "Changelog, https://github.com/fastapi/annotated-doc/release-notes.md"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "annotated-types",
+    "version": "0.8.0",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/annotated-types/annotated-types",
+      "Source, https://github.com/annotated-types/annotated-types",
+      "Changelog, https://github.com/annotated-types/annotated-types/releases"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "anyio",
+    "version": "4.16.0",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Documentation, https://anyio.readthedocs.io/en/latest/",
+      "Changelog, https://anyio.readthedocs.io/en/stable/versionhistory.html",
+      "Source code, https://github.com/agronholm/anyio",
+      "Issue tracker, https://github.com/agronholm/anyio/issues"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "beautifulsoup4",
+    "version": "4.15.0",
+    "license_metadata": "MIT License",
+    "project_urls": [
+      "Download, https://www.crummy.com/software/BeautifulSoup/bs4/download/",
+      "Homepage, https://www.crummy.com/software/BeautifulSoup/bs4/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "certifi",
+    "version": "2026.10.23",
+    "license_metadata": "MPL-2.0",
+    "project_urls": [
+      "Source, https://github.com/certifi/python-certifi"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "cffi",
+    "version": "2.1.1",
+    "license_metadata": "MIT-0",
+    "project_urls": [
+      "Documentation, https://cffi.readthedocs.io/",
+      "Changelog, https://cffi.readthedocs.io/en/latest/whatsnew.html",
+      "Download, https://github.com/python-cffi/cffi/releases",
+      "Contact, https://groups.google.com/forum/#!forum/python-cffi",
+      "Source Code, https://github.com/python-cffi/cffi",
+      "Issue Tracker, https://github.com/python-cffi/cffi/issues"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "charset-normalizer",
+    "version": "3.5.2",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Changelog, https://github.com/jawah/charset_normalizer/blob/master/CHANGELOG.md",
+      "Documentation, https://charset-normalizer.readthedocs.io/",
+      "Code, https://github.com/jawah/charset_normalizer",
+      "Issue tracker, https://github.com/jawah/charset_normalizer/issues"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "click",
+    "version": "8.5.0",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Changes, https://click.palletsprojects.com/page/changes/",
+      "Chat, https://discord.gg/pallets",
+      "Documentation, https://click.palletsprojects.com/",
+      "Donate, https://palletsprojects.com/donate",
+      "Source, https://github.com/pallets/click/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "colorama",
+    "version": "0.4.6",
+    "license_metadata": [
+      "License :: OSI Approved :: BSD License"
+    ],
+    "project_urls": [
+      "Homepage, https://github.com/tartley/colorama"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "cryptography",
+    "version": "50.0.2",
+    "license_metadata": "Apache-2.0 OR BSD-3-Clause",
+    "project_urls": [
+      "changelog, https://cryptography.io/en/latest/changelog/",
+      "documentation, https://cryptography.io/",
+      "homepage, https://github.com/pyca/cryptography",
+      "issues, https://github.com/pyca/cryptography/issues",
+      "source, https://github.com/pyca/cryptography/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "fastapi",
+    "version": "0.162.0",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/fastapi/fastapi",
+      "Documentation, https://fastapi.tiangolo.com/",
+      "Repository, https://github.com/fastapi/fastapi",
+      "Issues, https://github.com/fastapi/fastapi/issues",
+      "Changelog, https://fastapi.tiangolo.com/release-notes/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "greenlet",
+    "version": "3.5.6",
+    "license_metadata": "MIT AND PSF-2.0",
+    "project_urls": [
+      "Homepage, https://greenlet.readthedocs.io",
+      "Documentation, https://greenlet.readthedocs.io",
+      "Repository, https://github.com/python-greenlet/greenlet",
+      "Issues, https://github.com/python-greenlet/greenlet/issues",
+      "Changelog, https://greenlet.readthedocs.io/en/latest/changes.html"
+    ],
+    "scope": "QA do navegador"
+  },
+  {
+    "name": "h11",
+    "version": "0.16.0",
+    "license_metadata": "MIT",
+    "project_urls": [],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "httpcore",
+    "version": "1.0.9",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Documentation, https://www.encode.io/httpcore",
+      "Homepage, https://www.encode.io/httpcore/",
+      "Source, https://github.com/encode/httpcore"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "httpx",
+    "version": "0.28.1",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Changelog, https://github.com/encode/httpx/blob/master/CHANGELOG.md",
+      "Documentation, https://www.python-httpx.org",
+      "Homepage, https://github.com/encode/httpx",
+      "Source, https://github.com/encode/httpx"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "hypothesis",
+    "version": "6.170.14",
+    "license_metadata": "MPL-2.0",
+    "project_urls": [
+      "changelog, https://hypothesis.readthedocs.io/en/latest/changelog.html",
+      "documentation, https://hypothesis.readthedocs.io",
+      "homepage, https://hypothesis.works",
+      "issues, https://github.com/HypothesisWorks/hypothesis/issues",
+      "source, https://github.com/HypothesisWorks/hypothesis"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "idna",
+    "version": "3.20",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Changelog, https://github.com/kjd/idna/blob/master/HISTORY.md",
+      "Issue tracker, https://github.com/kjd/idna/issues",
+      "Source, https://github.com/kjd/idna"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "iniconfig",
+    "version": "2.3.1",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/pytest-dev/iniconfig"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "Jinja2",
+    "version": "3.1.6",
+    "license_metadata": [
+      "License :: OSI Approved :: BSD License"
+    ],
+    "project_urls": [
+      "Changes, https://jinja.palletsprojects.com/changes/",
+      "Chat, https://discord.gg/pallets",
+      "Documentation, https://jinja.palletsprojects.com/",
+      "Donate, https://palletsprojects.com/donate",
+      "Source, https://github.com/pallets/jinja/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "Mako",
+    "version": "1.4.3",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://www.makotemplates.org/",
+      "Documentation, https://docs.makotemplates.org",
+      "Issue Tracker, https://github.com/sqlalchemy/mako"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "MarkupSafe",
+    "version": "3.0.4",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Donate, https://palletsprojects.com/donate",
+      "Documentation, https://markupsafe.palletsprojects.com/",
+      "Changes, https://markupsafe.palletsprojects.com/page/changes/",
+      "Source, https://github.com/pallets/markupsafe/",
+      "Chat, https://discord.gg/pallets"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "opentelemetry-api",
+    "version": "1.45.2",
+    "license_metadata": "Apache-2.0",
+    "project_urls": [
+      "Homepage, https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api",
+      "Repository, https://github.com/open-telemetry/opentelemetry-python"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "packaging",
+    "version": "26.3",
+    "license_metadata": "Apache-2.0 OR BSD-2-Clause",
+    "project_urls": [
+      "Documentation, https://packaging.pypa.io/",
+      "Source, https://github.com/pypa/packaging"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pdfminer.six",
+    "version": "20260107",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/pdfminer/pdfminer.six"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pdfplumber",
+    "version": "0.11.10",
+    "license_metadata": [
+      "License :: OSI Approved :: MIT License"
+    ],
+    "project_urls": [],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pillow",
+    "version": "13.0.0",
+    "license_metadata": "MIT-CMU",
+    "project_urls": [
+      "Release notes, https://pillow.readthedocs.io/en/stable/releasenotes/index.html",
+      "Changelog, https://github.com/python-pillow/Pillow/releases",
+      "Documentation, https://pillow.readthedocs.io",
+      "Funding, https://tidelift.com/lifter/search/pypi/pillow",
+      "Homepage, https://python-pillow.org",
+      "Mastodon, https://fosstodon.org/@pillow",
+      "Security, https://pillow.readthedocs.io/en/stable/handbook/security.html",
+      "Source, https://github.com/python-pillow/Pillow"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pip",
+    "version": "22.3.1",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Documentation, https://pip.pypa.io",
+      "Source, https://github.com/pypa/pip",
+      "Changelog, https://pip.pypa.io/en/stable/news/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "playwright",
+    "version": "1.64.1",
+    "license_metadata": "Apache-2.0",
+    "project_urls": [
+      "homepage, https://github.com/Microsoft/playwright-python",
+      "Release notes, https://github.com/microsoft/playwright-python/releases"
+    ],
+    "scope": "QA do navegador"
+  },
+  {
+    "name": "pluggy",
+    "version": "1.7.0",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/pytest-dev/pluggy",
+      "Documentation, https://pluggy.readthedocs.io/",
+      "Changelog, https://pluggy.readthedocs.io/en/latest/changelog.html",
+      "Repository, https://github.com/pytest-dev/pluggy",
+      "Issues, https://github.com/pytest-dev/pluggy/issues",
+      "Funding, https://tidelift.com/subscription/pkg/pypi-pluggy"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "psycopg",
+    "version": "3.3.8",
+    "license_metadata": "LGPL-3.0-only",
+    "project_urls": [
+      "Homepage, https://psycopg.org/",
+      "Documentation, https://psycopg.org/psycopg3/docs/",
+      "Changes, https://psycopg.org/psycopg3/docs/news.html",
+      "Code, https://github.com/psycopg/psycopg",
+      "Issue Tracker, https://github.com/psycopg/psycopg/issues",
+      "Funding, https://github.com/sponsors/dvarrazzo"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "psycopg-binary",
+    "version": "3.3.8",
+    "license_metadata": "LGPL-3.0-only",
+    "project_urls": [
+      "Homepage, https://psycopg.org/",
+      "Documentation, https://psycopg.org/psycopg3/docs/",
+      "Changes, https://psycopg.org/psycopg3/docs/news.html",
+      "Code, https://github.com/psycopg/psycopg",
+      "Issue Tracker, https://github.com/psycopg/psycopg/issues",
+      "Funding, https://github.com/sponsors/dvarrazzo"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pycparser",
+    "version": "3.12",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Homepage, https://github.com/eliben/pycparser"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pydantic",
+    "version": "2.14.2",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/pydantic/pydantic",
+      "Documentation, https://pydantic.dev/docs/validation/latest/get-started/",
+      "Funding, https://github.com/sponsors/samuelcolvin",
+      "Source, https://github.com/pydantic/pydantic",
+      "Changelog, https://pydantic.dev/docs/validation/latest/get-started/changelog/"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pydantic_core",
+    "version": "2.50.2",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Funding, https://github.com/sponsors/samuelcolvin",
+      "Homepage, https://github.com/pydantic",
+      "Source, https://github.com/pydantic/pydantic/tree/main/pydantic-core"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pyee",
+    "version": "13.0.1",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Repository, https://github.com/jfhbrook/pyee",
+      "Documentation, https://pyee.readthedocs.io"
+    ],
+    "scope": "QA do navegador"
+  },
+  {
+    "name": "Pygments",
+    "version": "2.21.0",
+    "license_metadata": "BSD-2-Clause",
+    "project_urls": [
+      "Homepage, https://pygments.org",
+      "Documentation, https://pygments.org/docs",
+      "Source, https://github.com/pygments/pygments",
+      "Bug Tracker, https://github.com/pygments/pygments/issues",
+      "Changelog, https://github.com/pygments/pygments/blob/master/CHANGES"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pypdfium2",
+    "version": "5.14.0",
+    "license_metadata": "BSD-3-Clause, Apache-2.0, dependency licenses",
+    "project_urls": [
+      "Source, https://github.com/pypdfium2-team/pypdfium2",
+      "Tracker, https://github.com/pypdfium2-team/pypdfium2/issues",
+      "Documentation, https://pypdfium2.readthedocs.io",
+      "Changelog, https://pypdfium2.readthedocs.io/en/stable/changelog.html"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "pytest",
+    "version": "9.2.0",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Changelog, https://docs.pytest.org/en/stable/changelog.html",
+      "Contact, https://docs.pytest.org/en/stable/contact.html",
+      "Funding, https://docs.pytest.org/en/stable/sponsor.html",
+      "Homepage, https://docs.pytest.org/en/latest/",
+      "Source, https://github.com/pytest-dev/pytest",
+      "Tracker, https://github.com/pytest-dev/pytest/issues"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "python-multipart",
+    "version": "0.0.33",
+    "license_metadata": "Apache-2.0",
+    "project_urls": [
+      "Homepage, https://github.com/Kludex/python-multipart",
+      "Documentation, https://kludex.github.io/python-multipart/",
+      "Changelog, https://github.com/Kludex/python-multipart/blob/master/CHANGELOG.md",
+      "Source, https://github.com/Kludex/python-multipart"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "ruff",
+    "version": "0.17.3",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Changelog, https://github.com/astral-sh/ruff/blob/main/CHANGELOG.md",
+      "Documentation, https://docs.astral.sh/ruff/",
+      "Repository, https://github.com/astral-sh/ruff"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "setuptools",
+    "version": "65.5.0",
+    "license_metadata": [
+      "License :: OSI Approved :: MIT License"
+    ],
+    "project_urls": [
+      "Documentation, https://setuptools.pypa.io/",
+      "Changelog, https://setuptools.pypa.io/en/stable/history.html"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "sortedcontainers",
+    "version": "2.4.0",
+    "license_metadata": "Apache 2.0",
+    "project_urls": [],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "soupsieve",
+    "version": "2.10",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/facelessuser/soupsieve"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "SQLAlchemy",
+    "version": "2.1.8",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://www.sqlalchemy.org",
+      "Documentation, https://docs.sqlalchemy.org",
+      "Changelog, https://docs.sqlalchemy.org/latest/changelog/index.html",
+      "Source Code, https://github.com/sqlalchemy/sqlalchemy",
+      "Issue Tracker, https://github.com/sqlalchemy/sqlalchemy/issues",
+      "Discussions, https://github.com/sqlalchemy/sqlalchemy/discussions"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "starlette",
+    "version": "1.10.0",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Homepage, https://github.com/Kludex/starlette",
+      "Documentation, https://starlette.dev/",
+      "Changelog, https://starlette.dev/release-notes/",
+      "Funding, https://github.com/sponsors/Kludex",
+      "Source, https://github.com/Kludex/starlette"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "typing-inspection",
+    "version": "0.4.5",
+    "license_metadata": "MIT",
+    "project_urls": [
+      "Homepage, https://github.com/pydantic/typing-inspection",
+      "Documentation, https://pydantic.github.io/typing-inspection/dev/",
+      "Source, https://github.com/pydantic/typing-inspection",
+      "Changelog, https://github.com/pydantic/typing-inspection/blob/main/HISTORY.md"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "typing_extensions",
+    "version": "4.16.0",
+    "license_metadata": "PSF-2.0",
+    "project_urls": [
+      "Bug Tracker, https://github.com/python/typing_extensions/issues",
+      "Changes, https://github.com/python/typing_extensions/blob/main/CHANGELOG.md",
+      "Documentation, https://typing-extensions.readthedocs.io/",
+      "Home, https://github.com/python/typing_extensions",
+      "Q & A, https://github.com/python/typing/discussions",
+      "Repository, https://github.com/python/typing_extensions"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "tzdata",
+    "version": "2026.6",
+    "license_metadata": "Apache-2.0",
+    "project_urls": [
+      "Bug Reports, https://github.com/python/tzdata/issues",
+      "Source, https://github.com/python/tzdata",
+      "Documentation, https://tzdata.python.org"
+    ],
+    "scope": "ambiente principal e testes"
+  },
+  {
+    "name": "uvicorn",
+    "version": "0.54.0",
+    "license_metadata": "BSD-3-Clause",
+    "project_urls": [
+      "Changelog, https://uvicorn.dev/release-notes",
+      "Funding, https://github.com/sponsors/Kludex",
+      "Homepage, https://uvicorn.dev/",
+      "Source, https://github.com/Kludex/uvicorn"
+    ],
+    "scope": "ambiente principal e testes"
+  }
+]
