@@ -17,6 +17,17 @@ def corpus(text):
     return extract(("<html><body>" + text + "</body></html>").encode(), "text/html", Settings())
 
 
+def test_granted_period_is_a_duty_with_subject():
+    # Regressão (RN 1.137, Art. 17): "têm N dias para" não gerava obrigação nem prazo.
+    found = rule_candidates(
+        corpus(
+            "Art. 9º As geradoras têm 45 (quarenta e cinco) dias, a partir da publicação, para enviar dados."
+        )
+    )
+    assert [(c["subject"], c["modality"]) for c in found] == [("As geradoras", "duty")]
+    assert not rule_candidates(corpus("Art. 9º Os conselhos têm 5 membros titulares."))
+
+
 def candidate(extracted, **overrides):
     unit = next(u for u in extracted["units"] if u["kind"] == "article")
     return {

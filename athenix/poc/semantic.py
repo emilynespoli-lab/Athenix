@@ -181,7 +181,13 @@ def deterministic_items(doc, extraction, pages):
 def _anchor(unit, extraction):
     from ..evidence import verify
 
-    return verify(unit["text"].strip(), unit["id"], extraction["units"], extraction["text_hash"])
+    return verify(
+        unit["text"].strip(),
+        unit["id"],
+        extraction["units"],
+        extraction["text_hash"],
+        source=extraction.get("source"),
+    )
 
 
 def _unique(items):

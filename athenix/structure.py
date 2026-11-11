@@ -1,12 +1,28 @@
 """Extração e segmentação independentes; offsets no texto canônico, sem reparos ocultos."""
 
+import codecs
 import io
 import re
+from html.parser import HTMLParser
 from importlib.metadata import version
 
 from bs4 import BeautifulSoup
 
 from .db import digest
+from .evidence import key
+
+BOMS = (
+    (codecs.BOM_UTF8, "utf-8-sig"),
+    (codecs.BOM_UTF16_LE, "utf-16"),
+    (codecs.BOM_UTF16_BE, "utf-16"),
+)
+META_CHARSET = re.compile(rb"""<meta[^>]+charset\s*=\s*["']?\s*([A-Za-z0-9_.:-]+)""", re.I)
+# WHATWG Encoding: navegadores leem rótulos latin-1/ascii como windows-1252.
+LEGACY = {"iso-8859-1", "iso8859-1", "latin1", "latin-1", "l1", "cp819", "ascii", "us-ascii"}
+# Mojibake típico: UTF-8 lido como 1252 (Ã§, â€), byte inválido (�) e Latin Extended-A, ausente
+# do português (ş, ă, ŕ, ę, ő surgem de windows-1252 lido como windows-1250).
+SUSPECT = re.compile("�|Ã[\u0080-¿]|Â[\u0080-¿]|â€|[Ā-ſ]")
+SUSPECT_LIMIT = 3  # shortcut: limiar fixo; calibrar com corpus rotulado se entrarem textos não PT
 
 ARTICLE = re.compile(r'^\s*[“"]?\s*Art\.?\s*(\d+(?:[º°])?(?:-[A-Z])?)\.?\s*', re.I)
 PARAGRAPH = re.compile(r'^\s*[“"]?\s*(§\s*\d+[º°]?|Parágrafo único)\.?\s*', re.I)
@@ -37,12 +53,84 @@ MONTHS = {
         )
     )
 }
+# Aceita 30/10/2025, 30-10-2025, 30.10.2025 (rodapé "D.O. de") e "1º de julho de 2024".
 DATE = re.compile(
-    r"\b(\d{1,2})[/-](\d{1,2})[/-](\d{4})\b|\b(\d{1,2})\s+de\s+("
+    r"\b(?P<d>\d{1,2})(?P<sep>[/.-])(?P<m>\d{1,2})(?P=sep)(?P<y>\d{4})\b"
+    r"|\b(?P<day>\d{1,2})[º°]?\s+de\s+(?P<month>"
     + "|".join(MONTHS)
-    + r")\s+de\s+(\d{4})\b",
+    + r")\s+de\s+(?P<year>\d{4})\b",
     re.I,
 )
+
+
+def decode_html(content, charset=None):
+    """Bytes → texto na ordem do WHATWG: BOM, cabeçalho HTTP, <meta>, UTF-8 estrito, windows-1252."""
+    for bom, encoding in BOMS:
+        if content.startswith(bom):
+            return content.decode(encoding), encoding, "BOM"
+    meta = META_CHARSET.search(content[:4096])
+    declared = ((charset, "cabeçalho HTTP"), (meta and meta.group(1).decode("ascii"), "meta"))
+    for label, method in declared:
+        if not label:
+            continue
+        encoding = "windows-1252" if label.lower() in LEGACY else label.lower()
+        try:
+            return content.decode(encoding), encoding, method
+        except (LookupError, UnicodeDecodeError):
+            continue
+    try:
+        return content.decode("utf-8"), "utf-8", "UTF-8 estrito"
+    except UnicodeDecodeError:
+        return content.decode("windows-1252", errors="replace"), "windows-1252", "padrão legado"
+
+
+class _PlainText(HTMLParser):
+    """Leitura do HTML pela biblioteca padrão, sem a seleção de conteúdo do extrator."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts, self.skip = [], 0
+
+    def handle_starttag(self, tag, attrs):
+        self.skip += tag in {"script", "style"}
+
+    def handle_endtag(self, tag):
+        self.skip = max(0, self.skip - (tag in {"script", "style"}))
+
+    def handle_data(self, data):
+        if not self.skip:
+            self.parts.append(data)
+
+
+def independent_source(content, media, charset=None):
+    """Segunda leitura da fonte por outro motor. Citação só é verificada se aparecer nela."""
+    try:
+        if media == "text/html":
+            text, encoding, method = decode_html(content, charset)
+            parser = _PlainText()
+            parser.feed(text)
+            parser.close()
+            rendered, engine = "".join(parser.parts), f"html.parser+{encoding} ({method})"
+        else:
+            import pypdfium2
+
+            pdf = pypdfium2.PdfDocument(content)
+            try:
+                rendered = "\n".join(page.get_textpage().get_text_range() for page in pdf)
+            finally:
+                pdf.close()
+            engine = "pypdfium2/" + version("pypdfium2")
+    except Exception as error:  # sem segunda leitura, nenhuma citação é confirmável
+        return {"engine": None, "trusted": False, "suspect": 0, "samples": [], "key": "",
+                "error": type(error).__name__}  # fmt: skip
+    found = SUSPECT.findall(rendered)
+    return {
+        "engine": engine,
+        "trusted": len(found) < SUSPECT_LIMIT,
+        "suspect": len(found),
+        "samples": sorted(set(found))[:5],
+        "key": key(rendered),
+    }
 
 
 def detect_media(content, limit):
@@ -59,9 +147,10 @@ def detect_media(content, limit):
 def parse_date(match):
     from datetime import date
 
-    a, b, c, d, e, f = match.groups()
+    g = match.groupdict()
+    month = int(g["m"]) if g["m"] else MONTHS[g["month"].lower()]
     try:
-        return date(int(c or f), int(b) if b else MONTHS[e.lower()], int(a or d)).isoformat()
+        return date(int(g["y"] or g["year"]), month, int(g["d"] or g["day"])).isoformat()
     except ValueError:
         return None
 
@@ -85,12 +174,30 @@ def act_dates(text):
             found.append(
                 {"kind": kind, "date": parsed, "start": start, "end": end, "quote": text[start:end]}
             )
+    publication = {d["date"] for d in found if d["kind"] == "publication"}
+    vigor = r"entra(?:rá)?\s+em\s+vigor\s+na\s+data\s+de\s+sua\s+publicação"
+    for match in re.finditer(vigor, text, re.I):
+        if len(publication) != 1:  # sem data única de publicação, a vigência fica sem data
+            break
+        start = text.rfind("\n", 0, match.start()) + 1
+        end = text.find("\n", match.end())
+        end = len(text) if end < 0 else end
+        found.append(
+            {
+                "kind": "effective",
+                "date": next(iter(publication)),
+                "start": start,
+                "end": end,
+                "quote": text[start:end],
+                "basis": "publication",
+            }
+        )
     return found
 
 
 def segment(text, pages, faq=False):
     markers = []
-    quoted = False
+    quoted, nesting, straight = False, 0, False
     target = None
     stack = []
     offset = 0
@@ -162,13 +269,17 @@ def segment(text, pages, faq=False):
             stack.append(marker)
             if owner is None:
                 warnings.append("Bloco citado com norma-alvo não resolvida: " + identifier)
+        # Profundidade: “ANEXO 8.C” dentro de um bloco citado não encerra o bloco externo.
         for character in line:
             if character == "“":
-                quoted = True
+                nesting += 1
             elif character == "”":
-                quoted = False
+                nesting = max(0, nesting - 1)
             elif character == '"':
-                quoted = not quoted
+                straight = not straight
+        if re.search(r'[”"]\s*\(NR\)', line):  # LC 95: "(NR)" encerra a nova redação
+            nesting, straight = 0, False
+        quoted = nesting > 0 or straight
         offset += len(line)
     if not markers or markers[0]["start"] > 0:
         markers.insert(
@@ -196,12 +307,14 @@ def segment(text, pages, faq=False):
     return markers, warnings
 
 
-def extract(content, media, settings, role=None):
+def extract(content, media, settings, role=None, charset=None):
     warnings, links = [], []
     pieces = []
     faq = role == "clarification"
     if media == "text/html":
-        soup = BeautifulSoup(content, "html.parser")
+        # Decodificar antes: o palpite do BeautifulSoup leu windows-1252 como windows-1250.
+        decoded, encoding, method = decode_html(content, charset)
+        soup = BeautifulSoup(decoded, "html.parser")
         title = soup.title.get_text() if soup.title else ""
         faq = faq or bool(re.search(r"\bFAQ\b|perguntas frequentes", title, re.I))
         for tag in soup(["script", "style", "noscript", "iframe", "object", "svg"]):
@@ -224,7 +337,7 @@ def extract(content, media, settings, role=None):
                 }
             )
         pieces = [main_content.get_text("\n", strip=True)]
-        extractor = "beautifulsoup4/" + version("beautifulsoup4") + ":main-v1"
+        extractor = f"beautifulsoup4/{version('beautifulsoup4')}:main-v1;{encoding} ({method})"
     else:
         import pdfplumber
 
@@ -254,11 +367,19 @@ def extract(content, media, settings, role=None):
             raise ValueError(
                 "PDF corrompido, protegido ou não suportado; original preservado."
             ) from error
-    return from_pieces(pieces, links, warnings, extractor, settings, faq)
+    source = independent_source(content, media, charset)
+    return from_pieces(pieces, links, warnings, extractor, settings, faq, source)
 
 
-def from_pieces(pieces, links, warnings, extractor, settings, faq=False):
+def from_pieces(pieces, links, warnings, extractor, settings, faq=False, source=None):
     """Monta o resultado a partir do texto de cada página; usado também pelo pipeline com OCR."""
+    if not source:
+        warnings.append("Sem segunda leitura da fonte: citações ficam pendentes.")
+    elif not source["trusted"]:
+        warnings.append(
+            f"Texto da fonte possivelmente corrompido ({source['suspect']} ocorrências como "
+            f"{' '.join(source['samples'])}): citações ficam pendentes."
+        )
     pages = []
     text = "\n\f\n".join(pieces)
     if len(text) > settings.max_text:
@@ -305,4 +426,5 @@ def from_pieces(pieces, links, warnings, extractor, settings, faq=False):
         "warnings": warnings,
         "dates": act_dates(text),
         "references": references,
+        "source": source,
     }

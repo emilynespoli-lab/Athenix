@@ -1,0 +1,44 @@
+{
+ "nota": "Atos oficiais (Lei 9.610/1998, art. 8º, IV). Hashes conferidos na aquisição. Nenhum conteúdo foi editado.",
+ "documentos": [
+  {
+   "id": "ren20251137",
+   "arquivo": "../norma_poc/ren20251137.pdf",
+   "sha256": "4a581592e981158bb9a9ebbbed10a019d3c06399fd2890389bf88f3609cc5887",
+   "ato": "Resolução Normativa ANEEL nº 1.137, de 21 de outubro de 2025",
+   "tipo": "resolucao_normativa",
+   "formato": "application/pdf",
+   "afeta": ["distribuidoras", "transmissoras"],
+   "origem": "Já presente no repositório (PoC); texto compilado da ANEEL.",
+   "fonte": "oficial_previamente_obtida"
+  },
+  {
+   "id": "reh20243348",
+   "arquivo": "reh20243348.pdf",
+   "sha256": "c074ee9a23af3a633819135bd7c9b7a21106fb7a617f815af7de2a99e68e0f5c",
+   "ato": "Resolução Homologatória ANEEL nº 3.348, de 16 de julho de 2024",
+   "tipo": "resolucao_homologatoria",
+   "formato": "application/pdf",
+   "afeta": ["transmissoras", "ONS"],
+   "url": "https://ri.isaenergiabrasil.com.br/Arquivos/Download/Resolucao_Homologatoria_3_348_2024.pdf",
+   "adquirido_em_utc": "2026-11-11T01:52:09Z",
+   "robots": "HTTP 200; Disallow apenas /ajax",
+   "fonte": "secundaria",
+   "ressalva": "Cópia publicada por agente regulado (ISA Energia). www2.aneel.gov.br/cedoc e in.gov.br recusam acesso automatizado (desafio Cloudflare / robots Disallow). Conferir o hash com o original da ANEEL antes de uso externo. Só o corpo do ato (3 páginas); anexos com valores de RAP não estão neste arquivo."
+  },
+  {
+   "id": "dec12068",
+   "arquivo": "D12068.htm",
+   "sha256": "74f0e0d54568761a373291a350161c7ddab6094918d5158b0d9287f44a849ee0",
+   "ato": "Decreto nº 12.068, de 20 de junho de 2024",
+   "tipo": "decreto",
+   "formato": "text/html",
+   "codificacao": "windows-1252 (a página não declara charset)",
+   "afeta": ["distribuidoras", "ANEEL", "MME"],
+   "url": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2024/decreto/d12068.htm",
+   "adquirido_em_utc": "2026-11-11T01:52:00Z",
+   "robots": "HTTP 404 (sem robots.txt)",
+   "fonte": "oficial"
+  }
+ ]
+}

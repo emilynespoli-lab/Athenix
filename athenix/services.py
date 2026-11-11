@@ -109,7 +109,9 @@ def propose_finding(session, interpretation_id, actor, kind, quote, unit_id, exp
     if kind not in allowed:
         raise ValueError("Tipo de contestação desconhecido.")
     extracted = extraction_data(session, item.document_id)
-    anchor = verify(quote, unit_id, extracted["units"], extracted["text_hash"])
+    anchor = verify(
+        quote, unit_id, extracted["units"], extracted["text_hash"], source=extracted.get("source")
+    )
     if anchor["state"] != "verified":
         raise ValueError("Contestação exige trecho literal verificável na unidade declarada.")
     document = session.get(Document, item.document_id)

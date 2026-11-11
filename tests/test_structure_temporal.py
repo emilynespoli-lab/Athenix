@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 
 from athenix.config import Settings
-from athenix.structure import detect_media, extract, segment
+from athenix.structure import act_dates, detect_media, extract, segment
 from athenix.temporal import compute, rules
 
 
@@ -30,6 +30,21 @@ def test_amendment_closes_before_own_article(opener, closer):
     assert len([u for u in articles if u["owner"] == "self"]) == 2
     assert articles[1]["owner"] != "self"
     assert articles[-1]["owner"] == "self"
+
+
+def test_inner_quotes_do_not_close_amendment_block():
+    # Regressão (RN 1.137, item 109): “ANEXO 8.C” interno devolvia o resto do PRODIST à própria norma.
+    text = (
+        "Art. 1º A Resolução Normativa nº 9001 passa a vigorar com a seguinte redação:\n"
+        "“\n10. Informar o motivo, conforme “Anexo X: lista de causas” do Módulo 8;\n"
+        "11. A distribuidora deve enviar mensagens.\n"
+        "...................”(NR)\n"
+        "Art. 2º As distribuidoras deverão manter registros.\n"
+    )
+    units, warnings = segment(text, [{"number": 1, "start": 0, "end": len(text)}])
+    owners = {u["label"]: u["owner"] for u in units}
+    assert owners["11"] == owners["10"] != "self"
+    assert owners["2º"] == "self" and not any("Aspas" in w for w in warnings)
 
 
 def test_formula_denominator_and_table_letter_not_legal_units():
@@ -117,6 +132,42 @@ def test_inheritance_business_days_direction_and_missing_publication():
     assert rules("enviar em 10 dias úteis da publicação", "u", dates)[0]["date"] is None
     assert rules("até 20 dias antes da publicação", "u", dates)[0]["date"] == "2026-10-15"
     assert rules("vigência em 20 dias após publicação", "u", [])[0]["date"] is None
+
+
+@pytest.mark.parametrize(
+    "text,kind,expected",
+    [
+        # Regressão (RN 1.137): rodapé "publicado no D.O. de 30.10.2025" não era reconhecido.
+        (
+            "Este texto não substitui o publicado no D.O. de 30.10.2025, seção 1.",
+            "publication",
+            "2025-10-30",
+        ),
+        ("Este texto não substitui o publicado no DOU de 21.6.2024.", "publication", "2024-06-21"),
+        (
+            "Estabelecer, com vigência a partir de 1º de julho de 2024, as receitas",
+            "effective",
+            "2024-07-01",
+        ),
+    ],
+)
+def test_act_date_formats(text, kind, expected):
+    assert [(d["kind"], d["date"]) for d in act_dates(text)] == [(kind, expected)]
+
+
+def test_effective_on_publication_needs_a_single_publication_date():
+    # Regressão (RN 1.137, Art. 21): vigência "na data de sua publicação" ficava sem data.
+    rule = "Art. 9º Esta Resolução entra em vigor na data de sua publicação.\n"
+    dated = act_dates(rule + "Este texto não substitui o publicado no D.O. de 30.10.2025.")
+    effective = [d for d in dated if d["kind"] == "effective"]
+    assert [(d["date"], d["basis"], d["quote"]) for d in effective] == [
+        ("2025-10-30", "publication", rule.strip())
+    ]
+    assert not any(d["kind"] == "effective" for d in act_dates(rule))
+
+
+def test_mixed_separators_and_numbers_are_not_dates():
+    assert act_dates("publicado em 30.10/2025; Processo nº 48500.006650/2023-59; RN 1.137") == []
 
 
 def test_conflicting_dates_do_not_select_first():

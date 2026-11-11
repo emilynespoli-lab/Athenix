@@ -1,0 +1,156 @@
+{
+ "versao": 1,
+ "elaborado_por": "assistente de IA a partir do texto das fontes em fontes.json",
+ "revisado_por_humano": false,
+ "aviso": "Gabarito de engenharia, não parecer jurídico. Precisa de conferência por especialista em regulação antes de ser usado como referência externa. Cada 'trecho' é literal e verificado automaticamente na fonte (tests/test_gabarito.py).",
+ "convencoes": {
+  "trecho": "Comparado após juntar espaços, unificar aspas/travessões e ignorar maiúsculas.",
+  "autoria": "'self' = a própria norma; número = norma-alvo do bloco citado (só dígitos).",
+  "prazo.data": "Dias corridos, excluído o dia do começo (Código Civil, art. 132); null = não calculável sem evento futuro.",
+  "vigencia.data": "null = o documento não traz a data necessária; o sistema não deve presumir."
+ },
+ "casos": [
+  {
+   "id": "G01", "doc": "ren20251137", "dispositivo": "Art. 17",
+   "trecho": "As transmissoras têm 90 (noventa) dias, a partir da publicação, para implementar as disposições dos artigos 6º e 7º desta Resolução Normativa.",
+   "esperado": {
+    "obrigacao": {"modalidade": "duty", "sujeito": "transmissoras"},
+    "prazo": {"quantidade": 90, "unidade": "dias", "marco": "publication", "data": "2026-01-28"},
+    "autoria": "self"
+   },
+   "nota": "Dever expresso por 'têm N dias para'. Publicação: 'D.O. de 30.10.2025' no rodapé do próprio documento."
+  },
+  {
+   "id": "G02", "doc": "ren20251137", "dispositivo": "Art. 13, I",
+   "trecho": "Até 90 (noventa) dias para revisar e publicar os planos de manejo vegetal, de comunicação e de contingência",
+   "esperado": {
+    "obrigacao": {"modalidade": "duty", "sujeito": "distribuidoras"},
+    "prazo": {"quantidade": 90, "unidade": "dias", "marco": "publication", "data": "2026-01-28"},
+    "autoria": "self"
+   },
+   "nota": "Sujeito e marco ('contados da publicação') vêm do caput do Art. 13."
+  },
+  {
+   "id": "G03", "doc": "ren20251137", "dispositivo": "Art. 15",
+   "trecho": "As distribuidoras devem disponibilizar a API de que trata item 113 do Anexo IV",
+   "esperado": {
+    "obrigacao": {"modalidade": "duty", "sujeito": "distribuidoras"},
+    "prazo": {"quantidade": 60, "unidade": "dias", "marco": "event", "data": null},
+    "autoria": "self"
+   },
+   "nota": "Marco é a publicação futura das instruções pela ANEEL: sem data até o evento."
+  },
+  {
+   "id": "G04", "doc": "ren20251137", "dispositivo": "Art. 21",
+   "trecho": "Esta Resolução entra em vigor na data de sua publicação.",
+   "esperado": {"vigencia": {"data": "2025-10-30"}},
+   "evidencias": ["publicado no D.O. de 30.10.2025"]
+  },
+  {
+   "id": "G05", "doc": "ren20251137", "dispositivo": "Art. 19",
+   "trecho": "Revoga-se o inciso VIII do art. 621 da Resolução Normativa nº 1.000 de 2021.",
+   "esperado": {"revogacao": true, "autoria": "self"}
+  },
+  {
+   "id": "G06", "doc": "ren20251137", "dispositivo": "Anexo IV da RN 956, item 110 (redação dada pelo Art. 3º)",
+   "trecho": "A comunicação de que trata o item 105 deve ser realizada, obrigatoriamente, por meio de SMS e aplicativos de mensagens",
+   "esperado": {"obrigacao": {"modalidade": "duty"}, "autoria": "956"},
+   "nota": "Texto da RN 956 (PRODIST) citado entre aspas; aspas internas no item 109 não encerram o bloco."
+  },
+  {
+   "id": "G07", "doc": "ren20251137", "dispositivo": "Anexo IV da RN 956, item 122",
+   "trecho": "Situação de Crise: Evento que afeta significativamente a capacidade operacional da distribuidora",
+   "esperado": {"nao_obrigacao": true, "autoria": "956"},
+   "nota": "Definição: não é obrigação."
+  },
+  {
+   "id": "G08", "doc": "ren20251137", "dispositivo": "Art. 10",
+   "trecho": "A Agência poderá instituir Comitê de Crise quando da ocorrência de eventos climáticos severos",
+   "esperado": {"obrigacao": {"modalidade": "permission", "sujeito": "Agência"}, "autoria": "self"},
+   "nota": "Faculdade da ANEEL; não obriga distribuidoras nem transmissoras."
+  },
+  {
+   "id": "G09", "doc": "ren20251137", "dispositivo": "Art. 16",
+   "trecho": "os indicadores estabelecidos nos incisos V e VI do caput do art. 4º; do Decreto 12.068, de 20 de julho de 2024",
+   "esperado": {
+    "remissao": {"alvo_doc": "dec12068", "alvo_dispositivo": "Art. 4º, V e VI"},
+    "prazo": {"quantidade": 30, "unidade": "dias", "marco": "event", "data": null}
+   },
+   "nota": "Divergência na fonte: a remissão cita '20 de julho de 2024'; o Decreto 12.068 é de 20 de junho de 2024. O § 1º do art. 4º do Decreto lista os incisos V, VI e VII."
+  },
+  {
+   "id": "G10", "doc": "reh20243348", "dispositivo": "Art. 1º",
+   "trecho": "Estabelecer, com vigência a partir de 1º de julho de 2024, as Receitas Anuais Permitidas pela disponibilização das instalações sob responsabilidade",
+   "esperado": {"vigencia": {"data": "2024-07-01"}, "nao_obrigacao": true},
+   "nota": "Ato da ANEEL (homologação), não dever do regulado. Vigência dos valores de RAP."
+  },
+  {
+   "id": "G11", "doc": "reh20243348", "dispositivo": "Art. 3º, § 1º",
+   "trecho": "As Concessionárias alcançadas por esta Resolução deverão informar à ANEEL e ao ONS, em janeiro e, sempre que houver alteração, o seu regime de apuração do PIS/Pasep e da Cofins",
+   "esperado": {
+    "obrigacao": {"modalidade": "duty", "sujeito": "Concessionárias"},
+    "prazo": {"periodico": "anual, em janeiro, e a cada alteração"}
+   },
+   "nota": "Obrigação recorrente de transmissoras; sem quantidade de dias."
+  },
+  {
+   "id": "G12", "doc": "reh20243348", "dispositivo": "Art. 7º",
+   "trecho": "Os agentes deverão aditar o Contrato de Prestação de Serviços de Transmissão – CPST no ONS",
+   "esperado": {"obrigacao": {"modalidade": "duty", "sujeito": "agentes"}, "prazo": {"sem_data": true}},
+   "nota": "O ato não fixa prazo; qualquer data seria inventada."
+  },
+  {
+   "id": "G13", "doc": "reh20243348", "dispositivo": "Art. 3º, caput",
+   "trecho": "O Operador Nacional do Sistema Elétrico – ONS deverá incluir nos Avisos de Crédito",
+   "esperado": {"obrigacao": {"modalidade": "duty", "sujeito": "Operador Nacional do Sistema Elétrico"}},
+   "nota": "Aplicabilidade: destinatário é o ONS, não a transmissora."
+  },
+  {
+   "id": "G14", "doc": "reh20243348", "dispositivo": "Art. 8º",
+   "trecho": "Esta Resolução entra em vigor na data de sua publicação.",
+   "esperado": {"vigencia": {"data": null}},
+   "nota": "Esta cópia não traz a data de publicação; a vigência não pode ser datada."
+  },
+  {
+   "id": "G15", "doc": "dec12068", "dispositivo": "Art. 9º, § 1º",
+   "trecho": "será disponibilizada pela Aneel à concessionária, que deverá assiná-lo no prazo de noventa dias, contado da convocação",
+   "esperado": {
+    "obrigacao": {"modalidade": "duty", "sujeito": "concessionária"},
+    "prazo": {"quantidade": 90, "unidade": "dias", "marco": "event", "data": null}
+   },
+   "nota": "Quantidade por extenso."
+  },
+  {
+   "id": "G16", "doc": "dec12068", "dispositivo": "Art. 10, § 1º",
+   "trecho": "deverá ser aprovada e divulgada pela Aneel no prazo de cento e vinte dias, contado da publicação deste Decreto",
+   "esperado": {
+    "obrigacao": {"modalidade": "duty"},
+    "prazo": {"quantidade": 120, "unidade": "dias", "marco": "publication", "data": "2024-10-19"}
+   },
+   "nota": "Destinatário é a ANEEL. Publicação: 'DOU de 21.6.2024' no rodapé."
+  },
+  {
+   "id": "G17", "doc": "dec12068", "dispositivo": "Art. 4º, § 1º",
+   "trecho": "As distribuidoras deverão informar e manter, por até cinco anos, em seu sítio eletrônico, os indicadores estabelecidos nos incisos V, VI e VII do caput",
+   "esperado": {"obrigacao": {"modalidade": "duty", "sujeito": "distribuidoras"}, "autoria": "self"}
+  },
+  {
+   "id": "G18", "doc": "dec12068", "dispositivo": "Art. 22",
+   "trecho": "Fica revogado o art. 1º do Decreto nº 11.835, de 20 de dezembro de 2023",
+   "esperado": {"revogacao": true, "autoria": "self"},
+   "nota": "Revogação parcial ('na parte em que altera o art. 9º, § 1º')."
+  },
+  {
+   "id": "G19", "doc": "dec12068", "dispositivo": "Art. 23",
+   "trecho": "Este Decreto entra em vigor na data de sua publicação.",
+   "esperado": {"vigencia": {"data": "2024-06-21"}},
+   "evidencias": ["publicado no DOU de 21.6.2024"]
+  },
+  {
+   "id": "G20", "doc": "dec12068", "dispositivo": "Art. 19 (nova redação do art. 22 do Decreto 62.724/1968)",
+   "trecho": "regiões de elevada complexidade ao combate às perdas não técnicas",
+   "esperado": {"autoria": "62724"},
+   "nota": "Texto citado entre aspas pertence ao Decreto 62.724, não ao 12.068."
+  }
+ ]
+}

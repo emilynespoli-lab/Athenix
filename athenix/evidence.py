@@ -1,8 +1,27 @@
 import re
+import unicodedata
 
 from .db import digest
 
 TRANSLATION = {c: '"' for c in "“”„‟"} | {c: "'" for c in "‘’"} | {c: "-" for c in "–—"}
+
+
+def key(text):
+    """Chave para comparar leituras de motores diferentes: NFC, aspas/travessões unificados, sem
+    espaços (pdfplumber e pdfium divergem só na inferência de espaços)."""
+    normalized = unicodedata.normalize("NFC", text)
+    return "".join(TRANSLATION.get(c, c) for c in normalized if not c.isspace())
+
+
+def source_problem(literal, source):
+    """Motivo para não verificar: a citação precisa existir na segunda leitura da fonte original."""
+    if not source:
+        return "sem segunda leitura da fonte original: citação não confirmável"
+    if not source.get("trusted"):
+        return "texto da fonte possivelmente corrompido: citação não confirmável"
+    if key(literal) not in source["key"]:
+        return "trecho não confirmado na fonte original por leitura independente"
+    return None
 
 
 def normalize(text):
@@ -22,7 +41,7 @@ def locations(quote, text):
     return [match.start() for match in re.finditer(re.escape(quote), text)]
 
 
-def verify(quote, unit_id, units, text_hash, minimum=16):
+def verify(quote, unit_id, units, text_hash, minimum=16, source=None):
     unit = next((u for u in units if u["id"] == unit_id), None)
     result = {
         "unit_id": unit_id,
@@ -46,7 +65,12 @@ def verify(quote, unit_id, units, text_hash, minimum=16):
             (start + len(quote)) if original else positions[hits[0] + len(normalized_quote) - 1] + 1
         )
         literal = unit["text"][start:end]
+        # Achar no texto do próprio extrator é circular; confirmar na leitura independente.
+        problem = source_problem(literal, source)
+        if problem:
+            return result | {"state": "pending", "reason": problem}
         return result | {
+            "source_check": source["engine"],
             "state": "verified",
             "method": "exact" if original else "normalized",
             "start": unit["start"] + start,
