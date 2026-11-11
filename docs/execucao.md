@@ -22,6 +22,8 @@ Registro de verificações da aplicação, atualizado em 05/11/2026.
 
 ## Verificações registradas
 
+Em 10/11/2026: 121 testes aprovados. Avaliação contra gabarito de 20 casos em 3 atos reais (RN 1.137/2025, REH 3.348/2024 e Decreto 12.068/2024): 6/20 casos corretos no código recebido, 13/20 após as correções. Citação só é verificada se existir numa segunda leitura independente da fonte; âncoras falsamente verificadas caíram de 3, 1 e 124 para zero. Texto de OCR, tabelas e fórmulas não confirmados ficam pendentes. O gabarito ainda não foi revisado por especialista. Método, versões e limites em [avaliacao.md](avaliacao.md). Pendente no HTML: quebra de linha em cada tag.
+
 O resultado final da suíte está em `artifacts/tests.xml`: 80 testes aprovados, sem falhas, erros ou testes ignorados. O resultado do navegador está em `artifacts/browser-qa.json`, com conjunto rotulado `synthetic_new`. O relatório final registra seis candidatos, nove âncoras verificadas conferidas (incluindo a nova versão após correção), zero falhas no recálculo, duas versões preservadas e nenhum erro JavaScript no roteiro. O encerramento do servidor e a remoção do banco temporário também passaram. Isso não mede precisão jurídica, recall nem desempenho da IA.
 
 `artifacts/verification.json` consolida contagens do JUnit, ambiente e hashes dos arquivos de código com LF normalizado. A suíte emite um aviso de depreciação do cliente de testes Starlette/httpx; ele está registrado e não é falha da aplicação.

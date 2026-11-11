@@ -1,8 +1,26 @@
 import pytest
 from hypothesis import given, strategies as st
 
+from athenix import evidence
 from athenix.db import digest
-from athenix.evidence import recheck, verify
+from athenix.evidence import key, recheck
+
+
+def verify(quote, unit_id, units, text_hash):
+    # Estes testes cobrem posição/normalização; a segunda leitura é declarada igual ao texto.
+    source = {"engine": "teste", "trusted": True, "key": key("".join(u["text"] for u in units))}
+    return evidence.verify(quote, unit_id, units, text_hash, source=source)
+
+
+def test_without_independent_source_never_verified():
+    text, units, hashed = corpus()
+    assert evidence.verify(units[0]["text"], "a", units, hashed)["state"] == "pending"
+    untrusted = {"engine": "x", "trusted": False, "key": key(text)}
+    anchor = evidence.verify(units[0]["text"], "a", units, hashed, source=untrusted)
+    assert anchor["state"] == "pending" and "corrompido" in anchor["reason"]
+    other = {"engine": "x", "trusted": True, "key": key("outro texto qualquer")}
+    anchor = evidence.verify(units[0]["text"], "a", units, hashed, source=other)
+    assert anchor["state"] == "pending" and "não confirmado" in anchor["reason"]
 
 
 def corpus(

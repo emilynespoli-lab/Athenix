@@ -111,7 +111,14 @@ def evaluate(item, extraction, role="norm", target_dates=None, generator="rules"
     by_id = {u["id"]: u for u in units}
     item = validate_item(item, set(by_id))
     anchors = [
-        verify(e["quote"], e["unit_id"], units, extraction["text_hash"]) for e in item["evidence"]
+        verify(
+            e["quote"],
+            e["unit_id"],
+            units,
+            extraction["text_hash"],
+            source=extraction.get("source"),
+        )
+        for e in item["evidence"]
     ]
     objections, deadlines = [], []
 

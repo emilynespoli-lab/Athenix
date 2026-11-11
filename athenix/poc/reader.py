@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pdfplumber
 
-from ..structure import from_pieces
+from ..structure import from_pieces, independent_source
 
 FAITHFUL, UNCERTAIN, MISSING, REVIEW = "faithful", "uncertain", "not_extracted", "needs_review"
 _RANK = {FAITHFUL: 0, UNCERTAIN: 1, REVIEW: 2, MISSING: 3}
@@ -174,7 +174,11 @@ def read_pdf(path, settings, ocr=None):
     extractor = f"pdfplumber/{version('pdfplumber')}" + "".join(
         f"+{e}" for e in engines or (["ocr"] if ocr else [])
     )
-    extraction = from_pieces(pieces, links, [], extractor, settings)
+    warnings = []
+    if any(p["source"] == "ocr" for p in pages):
+        warnings.append("Texto de OCR não tem segunda leitura: suas citações ficam pendentes.")
+    source = independent_source(content, "application/pdf")
+    extraction = from_pieces(pieces, links, warnings, extractor, settings, source=source)
     return {"document": document, "pages": pages, "tables": tables, "extraction": extraction}
 
 
