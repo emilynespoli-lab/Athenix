@@ -156,3 +156,38 @@ def test_heading_never_swallows_normative_text():
     heading = next(u for u in units if u["kind"] == "heading")
     assert "deverá" not in heading["text"] and "AVALIAÇÃO" in heading["text"]
     assert any("deverá" in u["text"] and u["kind"] != "heading" for u in units)
+
+
+def test_duty_and_permission_in_same_unit_are_both_kept():
+    from athenix.proposals import rule_candidates
+
+    page = (
+        "<html><body><p>Art. 3º A comunicação ao consumidor deve ser realizada por SMS em até uma hora."
+        " Adicionalmente, as distribuidoras podem utilizar os seguintes canais:</p>"
+        "<p>a) aplicativo próprio;</p><p>b) rádio.</p>"
+        "<p>Art. 4º Conforme o Art. 3º, o relatório deve ser enviado ao ONS.</p></body></html>"
+    )
+    found = [
+        (c["modality"], c["action"])
+        for c in rule_candidates(extract(page.encode(), "text/html", Settings()))
+    ]
+    # Antes: o caput enumera ("…canais:") e era descartado inteiro, levando junto o dever do SMS.
+    assert (
+        "duty",
+        "Art. 3º A comunicação ao consumidor deve ser realizada por SMS em até uma hora.",
+    ) in found
+    assert [m for m, a in found if a.startswith(("a)", "b)"))] == ["permission", "permission"]
+    # "Art. 3º" no meio da frase não é fim de frase.
+    assert ("duty", "Art. 4º Conforme o Art. 3º, o relatório deve ser enviado ao ONS.") in found
+
+
+def test_real_items_106_and_110_keep_their_duties(ren):
+    _, items = ren
+    duties = [
+        " ".join((i["literal_text"] or "").split()) for i in items if i["type"] == "obligation"
+    ]
+    # Antes: item 110 sem dever; item 106 inteiro classificado como permissão.
+    assert any(d.startswith("110. A comunicação de que trata o item 105 deve") for d in duties)
+    assert any(
+        d.startswith("106. As distribuidoras de energia devem disponibilizar") for d in duties
+    )
