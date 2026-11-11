@@ -94,3 +94,34 @@ def test_real_decree_deadlines_from_number_words():
     }
     # Antes: nenhuma quantidade por extenso era lida (0 prazos de 90/120/36 no Decreto).
     assert {(90, "event", None), (120, "publication", "2024-10-19"), (36, "event", None)} <= found
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("deverão informar à ANEEL e ao ONS, em janeiro e, sempre que houver alteração", "em janeiro"),
+        ("devem realizar comunicações formais, com periodicidade anual, aos representantes", "com periodicidade anual"),
+        ("Os indicadores devem ser apurados mensalmente, considerando o mês civil", "mensalmente"),
+        ("deverá ser revisado a cada ano pela distribuidora", "a cada ano"),
+    ],
+)  # fmt: skip
+def test_periodic_obligation_has_own_representation(text, expected):
+    [record] = [r for r in rules(text, "u", PUB) if r["unit"] == "periodic"]
+    assert (record["event"], record["state"], record["date"]) == (expected, "recurring", None)
+
+
+def test_month_with_year_is_not_recurring():
+    assert not [
+        r for r in rules("deverá entregar em janeiro de 2026", "u", PUB) if r["unit"] == "periodic"
+    ]
+
+
+def test_real_reh_january_report_is_recurring():
+    doc = sources()["reh20243348"]
+    assert doc["sha256"] == "c074ee9a23af3a633819135bd7c9b7a21106fb7a617f815af7de2a99e68e0f5c"
+    read = reader.read_pdf(doc["path"], Settings())
+    items, _ = deterministic_items(read["document"], read["extraction"], read["pages"])
+    periodic = [i["interpretation"]["event"] for i in items if i["type"] == "deadline"
+                and i["interpretation"]["unit"] == "periodic"]  # fmt: skip
+    # Antes: 0 prazos recorrentes; o § 1º do Art. 3º (informar "em janeiro") ficava sem prazo.
+    assert "em janeiro" in periodic

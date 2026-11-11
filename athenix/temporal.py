@@ -32,6 +32,27 @@ EVENT = re.compile(
 )
 
 
+MONTH_NAMES = (
+    "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro"
+)
+FREQUENCY = "anual|mensal|semestral|trimestral|bimestral|semanal|diária"
+# Recorrência: "anualmente", "com periodicidade anual", "a cada ano", "em janeiro" (sem ano).
+PERIODIC = re.compile(
+    r"\b(?:(?:anual|mensal|semestral|trimestral|bimestral|semanal|diari)mente"
+    rf"|com\s+periodicidade\s+(?:mínima\s+)?(?:{FREQUENCY})"
+    r"|a\s+cada\s+(?:ano|mês|semestre|trimestre|bimestre|semana)"
+    rf"|(?:em|no\s+mês\s+de)\s+(?:{MONTH_NAMES})(?!\s+de\s+\d{{4}}))\b",
+    re.I,
+)
+
+
+def clause(text, start, end):
+    """Cláusula entre o ponto/ponto e vírgula anterior e o seguinte."""
+    left = max(text.rfind(".", 0, start), text.rfind(";", 0, start)) + 1
+    tail = re.split(r"[.;]", text[end:], maxsplit=1)[0]
+    return text[left:end] + tail
+
+
 def quantity(token):
     if token.isdigit():
         return int(token)
@@ -125,6 +146,24 @@ def rules(text, unit_id, dates, inherited="", clarification=False, target_dates=
             f"convenção: exclui início, mês limitado ao último dia (v1). {reason}."
         )
         result.append(record)
+    for match in PERIODIC.finditer(text):
+        result.append(
+            {
+                "unit_id": unit_id,
+                "quantity": None,
+                "unit": "periodic",
+                "landmark": "recurring",
+                "event": match.group(0),
+                "quote": clause(text, match.start(), match.end()).strip(),
+                "direction": 1,
+                "convention": "periodic_v1",
+                "inherited": False,
+                "date": None,
+                "state": "recurring",
+                "explanation": f"Obrigação recorrente ({match.group(0)}); próxima ocorrência "
+                "não calculada sem calendário de referência.",
+            }
+        )
     if not periods:
         for match in DATE.finditer(text):
             parsed = parse_date(match)

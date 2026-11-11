@@ -71,6 +71,7 @@ LABELS = {
     "confirmed": "Confirmado por pessoa",
     "awaiting_event": "Sem data até evento",
     "not_calculated": "Não calculado",
+    "recurring": "Recorrente",
     "norm": "Norma",
     "compiled": "Versão compilada",
     "clarification": "Esclarecimento",
