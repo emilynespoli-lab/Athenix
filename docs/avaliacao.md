@@ -46,6 +46,9 @@ na fonte, extraída sem o segmentador do sistema.
 | `inicial` | código recebido | 6/20 | não medido com referência independente | 254/254 · 29/29 · 4/92 (método circular para PDF) |
 | `fase2` | prazo "têm N dias", datas, aspas aninhadas, vigência | 11/20 | 3/364 · 1/31 · 124/128 | 256/259 · 28/29 · 4/92 |
 | `item0` | decodificação HTML (BOM → cabeçalho → meta → UTF-8 → windows-1252), detector de mojibake, citação confirmada por segunda leitura | 13/20 | **0/360 · 0/30 · 0/160** | 256/258 · 29/29 · 126/126 |
+| `etapa1` | prazos por extenso, publicação própria × outro evento, assinatura × publicação, prazo herdado sem duplicar, obrigação periódica, título encerra dispositivo, dever + permissão por frase, sujeito sem rótulo | 18/20 | 0/336 · 0/32 · 0/173 | 252/254 · 31/31 · 140/140 |
+
+Em `etapa1`, na RN 1.137: prazos duplicados 12 → 0, sujeitos com rótulo ("132.", "a)") 135 → 0, penalidades 4 → 3 (as 3 restantes são "Constitui infração" da RN 846), prazos recorrentes 0 → 2. Decreto: sujeitos com rótulo 9 → 0.
 
 Em `item0`, ficam pendentes (e não verificadas) 2 âncoras da RN (itens 23-G e 23-H, cuja unidade
 engole uma tabela) e 1 da REH (fórmula). Mojibake no texto do Decreto: 634 → 0.
@@ -98,8 +101,6 @@ Itens da revisão técnica fora do escopo atual (decisão de 11/11/2026: prioriz
 
 | Casos | Causa |
 | --- | --- |
-| Decreto | Codificação resolvida em `item0`. Resta a quebra de linha em cada tag, que separa "Art." do número (item 3). |
-| G15, G16 | Quantidade por extenso ("noventa dias", "cento e vinte dias") não reconhecida. |
-| G06 | Unidade com "deve" e "podem" vira só permissão; o dever se perde. |
-| G11 | Obrigação periódica ("em janeiro") sem representação de prazo. |
-| G09 | Remissões nunca resolvidas; a divergência "20 de julho" × "20 de junho" do Decreto citado passa sem alerta. |
+| G18 (Decreto) | HTML quebra linha em cada tag e separa "Art." do número (item 3): o Art. 22 não vira dispositivo próprio, então revogação e autoria falham. |
+| G09 | Remissões nunca resolvidas (item 8); a divergência "20 de julho" × "20 de junho" do Decreto citado passa sem alerta (item 12). |
+| — | Sujeito com oração relativa no Decreto ("…à concessionária, que"): o sujeito correto está contido, mas não isolado. |

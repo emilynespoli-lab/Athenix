@@ -191,3 +191,25 @@ def test_real_items_106_and_110_keep_their_duties(ren):
     assert any(
         d.startswith("106. As distribuidoras de energia devem disponibilizar") for d in duties
     )
+
+
+@pytest.mark.parametrize(
+    "context,expected",
+    [
+        ("132. Ao acionar o mecanismo de Cessão Emergencial de recursos, a distribuidora cessionária deve enviar", "a distribuidora cessionária"),
+        ("b) a cessionária deverá manter dossiê", "a cessionária"),
+        ("II - As concessionárias deverão informar", "As concessionárias"),
+        ("Art 10. A Agência poderá instituir Comitê", "A Agência"),
+        ("As distribuidoras, permissionárias e cooperativas devem enviar", "As distribuidoras, permissionárias e cooperativas"),
+    ],
+)  # fmt: skip
+def test_subject_without_label_or_leading_clause(context, expected):
+    from athenix.proposals import subject_of
+
+    assert subject_of(context) == expected
+
+
+def test_real_subjects_have_no_labels(ren):
+    _, items = ren
+    # Antes: 135 sujeitos começavam por rótulo ("132.", "a)", "I -"). Depois: 0.
+    assert quality(items)["sujeitos_com_rotulo"] == 0

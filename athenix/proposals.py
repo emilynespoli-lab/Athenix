@@ -105,10 +105,22 @@ def enumerating(text):
     return last if DUTY.search(last) else text
 
 
+LEADING_LABEL = re.compile(
+    r'^\s*[“"]?\s*(?:Art\.?\s*\d+(?:-[A-Z])?[º°]?\.?|§\s*\d+[º°]?\.?|Parágrafo único\.?'
+    r"|[IVXLCDM]+\s*[–—-]|[a-z]\)|\d+(?:-[A-Z])?\.)\s*"
+)
+
+
 def subject_of(context):
+    """Sujeito literal antes do verbo, sem rótulo do dispositivo nem oração adverbial inicial."""
     match = DUTY.search(context)
-    subject = context[: match.start()].strip() if match else "não identificado"
-    subject = re.sub(r"^\s*(?:Art\.?\s*\d+[º°]?\.?|§\s*\d+[º°]?)\s*", "", subject)
+    if not match:
+        return "não identificado"
+    subject = LEADING_LABEL.sub("", context[: match.start()]).strip()
+    # "Ao acionar o mecanismo…, a distribuidora cessionária" → "a distribuidora cessionária".
+    head, _, last = subject.rpartition(",")
+    if head and re.match(r"\s*(?:o|a|os|as)\s+\w", last, re.I):
+        subject = last.strip()
     return "não identificado" if not subject or len(subject) > 180 else subject
 
 
