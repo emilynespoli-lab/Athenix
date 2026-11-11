@@ -55,3 +55,29 @@ def test_real_embargo_daily_fine_is_cited_under_art_16(ren846):
     )
     assert by_id[unit["parent"]]["label"] == "16"
     assert [u["label"] for u in units if u["kind"] == "article"].count("8º") == 1
+
+
+@pytest.mark.parametrize(
+    "text,value",
+    [
+        ("cento e vinte e cinco milésimos por cento", 0.125),
+        ("vinte e cinco centésimos por cento", 0.25),
+        ("cinco décimos por cento", 0.5),
+        ("zero vírgula zero um por cento", 0.01),
+        ("zero vírgula vinte e cinco por cento", 0.25),
+        ("cento e vinte por cento", 120),
+    ],
+)
+def test_spelled_percentages(text, value):
+    from scripts.extrair_parametros import spelled
+
+    assert spelled(text) == pytest.approx(value)
+
+
+def test_digits_vs_words_mismatch_is_flagged():
+    from scripts.extrair_parametros import mismatches
+
+    # Texto real da REN 846 compilada, Art. 45-I, § 4º.
+    assert mismatches("Será acrescido o valor de 25% (cinco por cento) para cada antecedente")
+    assert not mismatches("I - 40% (quarenta por cento) para cada caso de reincidência")
+    assert not mismatches("III - de 1% a 5% (um a cinco por cento) para cada caso")
