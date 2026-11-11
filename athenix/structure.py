@@ -37,10 +37,12 @@ MONTHS = {
         )
     )
 }
+# Aceita 30/10/2025, 30-10-2025, 30.10.2025 (rodapé "D.O. de") e "1º de julho de 2024".
 DATE = re.compile(
-    r"\b(\d{1,2})[/-](\d{1,2})[/-](\d{4})\b|\b(\d{1,2})\s+de\s+("
+    r"\b(?P<d>\d{1,2})(?P<sep>[/.-])(?P<m>\d{1,2})(?P=sep)(?P<y>\d{4})\b"
+    r"|\b(?P<day>\d{1,2})[º°]?\s+de\s+(?P<month>"
     + "|".join(MONTHS)
-    + r")\s+de\s+(\d{4})\b",
+    + r")\s+de\s+(?P<year>\d{4})\b",
     re.I,
 )
 
@@ -59,9 +61,10 @@ def detect_media(content, limit):
 def parse_date(match):
     from datetime import date
 
-    a, b, c, d, e, f = match.groups()
+    g = match.groupdict()
+    month = int(g["m"]) if g["m"] else MONTHS[g["month"].lower()]
     try:
-        return date(int(c or f), int(b) if b else MONTHS[e.lower()], int(a or d)).isoformat()
+        return date(int(g["y"] or g["year"]), month, int(g["d"] or g["day"])).isoformat()
     except ValueError:
         return None
 
@@ -85,12 +88,30 @@ def act_dates(text):
             found.append(
                 {"kind": kind, "date": parsed, "start": start, "end": end, "quote": text[start:end]}
             )
+    publication = {d["date"] for d in found if d["kind"] == "publication"}
+    vigor = r"entra(?:rá)?\s+em\s+vigor\s+na\s+data\s+de\s+sua\s+publicação"
+    for match in re.finditer(vigor, text, re.I):
+        if len(publication) != 1:  # sem data única de publicação, a vigência fica sem data
+            break
+        start = text.rfind("\n", 0, match.start()) + 1
+        end = text.find("\n", match.end())
+        end = len(text) if end < 0 else end
+        found.append(
+            {
+                "kind": "effective",
+                "date": next(iter(publication)),
+                "start": start,
+                "end": end,
+                "quote": text[start:end],
+                "basis": "publication",
+            }
+        )
     return found
 
 
 def segment(text, pages, faq=False):
     markers = []
-    quoted = False
+    quoted, nesting, straight = False, 0, False
     target = None
     stack = []
     offset = 0
@@ -162,13 +183,17 @@ def segment(text, pages, faq=False):
             stack.append(marker)
             if owner is None:
                 warnings.append("Bloco citado com norma-alvo não resolvida: " + identifier)
+        # Profundidade: “ANEXO 8.C” dentro de um bloco citado não encerra o bloco externo.
         for character in line:
             if character == "“":
-                quoted = True
+                nesting += 1
             elif character == "”":
-                quoted = False
+                nesting = max(0, nesting - 1)
             elif character == '"':
-                quoted = not quoted
+                straight = not straight
+        if re.search(r'[”"]\s*\(NR\)', line):  # LC 95: "(NR)" encerra a nova redação
+            nesting, straight = 0, False
+        quoted = nesting > 0 or straight
         offset += len(line)
     if not markers or markers[0]["start"] > 0:
         markers.insert(

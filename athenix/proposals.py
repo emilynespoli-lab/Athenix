@@ -7,7 +7,9 @@ from .evidence import recheck, verify
 from .temporal import PERIOD, rules
 
 DUTY = re.compile(
-    r"\b(?:dever[áã](?:o)?|devem|deve|é obrigatóri[oa]|ficam? obrigad[oa]s?|é vedad[oa]|não poder[áã]o?|poder[áã]o?|podem)\b",
+    r"\b(?:dever[áã](?:o)?|devem|deve|é obrigatóri[oa]|ficam? obrigad[oa]s?|é vedad[oa]|não poder[áã]o?|poder[áã]o?|podem"
+    # "têm 90 (noventa) dias ... para": prazo concedido é dever; exige unidade temporal logo após.
+    r"|t[êe]m\s+(?:o\s+prazo\s+de\s+)?\d+\s*(?:\([^)]{1,40}\)\s*)?(?:dias|meses|anos))\b",
     re.I,
 )
 EXCEPTION = re.compile(r"\b(?:exceto|salvo|ressalvad[oa]s?)\b[^.;\n]*", re.I)
