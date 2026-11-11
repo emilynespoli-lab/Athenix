@@ -157,6 +157,8 @@ def deterministic_items(doc, extraction, pages):
                 }
             )
     for unit in units:
+        if unit.get("struck") == "revoked":
+            continue  # redação revogada (riscada) não gera penalidade, revogação nem remissão
         for kind, pattern in TYPES:
             # Penalidade/revogação só com base no próprio dispositivo, nunca num título.
             if unit["kind"] != "heading" and pattern.search(unit["text"]):

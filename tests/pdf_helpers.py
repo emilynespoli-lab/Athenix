@@ -29,8 +29,11 @@ def synthetic_pdf(scanned=False):
     )
 
 
-def lines_pdf(pages):
-    """PDF sintético com texto ASCII: `pages` é uma lista de listas de linhas (uma lista por página)."""
+def lines_pdf(pages, struck=()):
+    """PDF sintético com texto ASCII: `pages` é uma lista de listas de linhas (uma lista por página).
+
+    `struck`: pares (página, linha), contados de 0, riscados por um traço na altura do meio do texto.
+    """
     count = len(pages)
     font = 3 + 2 * count
     objects = [
@@ -52,6 +55,11 @@ def lines_pdf(pages):
             )
             + b" ET"
         )
+        for line_index, line in enumerate(lines):
+            if (index, line_index) in struck:
+                y = 764 - 16 * line_index + 4  # linha de base + ~1/3 do corpo 12 da Helvetica
+                width = 40 + 6 * len(line)
+                body += f" 0.5 w 40 {y} m {width} {y} l S".encode()
         objects.append(
             f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 {font} 0 R >> >> "
             f"/Contents {4 + 2 * index} 0 R >>".encode()
