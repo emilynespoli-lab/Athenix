@@ -174,6 +174,26 @@ def check(case, extraction, items):
     return out
 
 
+LABEL_JUNK = re.compile(r"^\s*(?:\d+(?:-[A-Z])?\.|[a-z]\)|[IVXLCDM]+\s*[-–]|Art\.?\s*\d)")
+
+
+def quality(items):
+    """Sinais globais sem gabarito: prazos repetidos, sujeitos com rótulo, penalidades e recorrências."""
+    deadlines = [i["interpretation"] for i in items if i["type"] == "deadline"]
+    keys = [(d.get("quote"), d.get("quantity"), d.get("unit")) for d in deadlines]
+    subjects = [
+        i["interpretation"]["subject"]
+        for i in items
+        if i["type"] in DEONTIC and i["interpretation"]
+    ]
+    return {
+        "prazos_duplicados": len(keys) - len(set(keys)),
+        "sujeitos_com_rotulo": sum(bool(LABEL_JUNK.match(s)) for s in subjects),
+        "penalidades": sum(i["type"] == "penalty" for i in items),
+        "prazos_periodicos": sum(d.get("unit") == "periodic" for d in deadlines),
+    }
+
+
 def evaluate():
     docs, spec = sources(), gold()
     results, global_items = [], {}
@@ -196,6 +216,7 @@ def evaluate():
             },
             # Verificada pelo sistema, mas o trecho não existe na fonte lida por outro motor.
             "falsas_verificadas": sum(flat(a["quote"]) not in reference for a in verified),
+            **quality(items),
         }
         for case in (c for c in spec["casos"] if c["doc"] == doc_id):
             checks = check(case, extraction, items)
