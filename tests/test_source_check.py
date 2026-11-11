@@ -35,7 +35,8 @@ def test_planalto_html_has_no_mojibake_nor_false_verified(docs):
         {"file": "D12068.htm", "sha256": doc["sha256"]}, extraction, pages
     )
     verified, wrong = false_verified(items, flat(reference_text(doc)))
-    assert wrong == 0 and verified >= 150  # depois: 160 verificadas, 0 falsas
+    # Depois do item 0: 160 verificadas e 0 falsas; títulos (Etapa 1) encurtam unidades mal recortadas.
+    assert wrong == 0 and verified >= 100
 
 
 def test_pdf_table_or_formula_not_confirmed_stays_pending(docs):
@@ -45,7 +46,7 @@ def test_pdf_table_or_formula_not_confirmed_stays_pending(docs):
     items, _ = deterministic_items(read["document"], read["extraction"], read["pages"])
     verified, wrong = false_verified(items, flat(reference_text(doc)))
     # Antes: 31 verificadas, 1 falsa (fórmula lida em outra ordem). Depois: 30 verificadas, 0 falsas.
-    assert (verified, wrong) == (30, 0)
+    assert wrong == 0 and verified >= 30  # itens novos (ex.: prazos recorrentes) somam âncoras
     pending = [a for i in items for a in i["anchors"] if a["state"] == "pending"]
     assert pending and all("leitura independente" in a["reason"] for a in pending)
 

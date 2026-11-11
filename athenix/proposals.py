@@ -16,10 +16,36 @@ EXCEPTION = re.compile(r"\b(?:exceto|salvo|ressalvad[oa]s?)\b[^.;\n]*", re.I)
 CONDITION = re.compile(r"\b(?:caso|desde que|se houver|quando)\b[^.;\n]*", re.I)
 
 
+# Fim de frase: ";" ou ":" antes de espaço, ou "." após palavra minúscula e antes de maiúscula
+# (não corta "Art. 17", "110." nem "1.137").
+BOUNDARY = re.compile(r"[;:](?=\s)|(?<=[a-zà-úç]{3})\.(?=\s+[A-ZÀ-Ú])")
+
+
 def modality(text):
     if re.search(r"vedad|não poder[áã]o?", text, re.I):
         return "prohibition"
     return "permission" if re.search(r"\bpoder[áã]o?\b|\bpodem\b", text, re.I) else "duty"
+
+
+def modalities(text):
+    """Todas as modalidades expressas no trecho (um dispositivo pode ter dever e permissão)."""
+    found = set()
+    for match in DUTY.finditer(text):
+        token = match.group(0).lower()
+        if token.startswith(("não", "é vedad")):
+            found.add("prohibition")
+        else:
+            found.add("permission" if token.startswith("pod") else "duty")
+    return found
+
+
+def sentences(text):
+    spans, start = [], 0
+    for match in BOUNDARY.finditer(text):
+        spans.append(text[start : match.end()])
+        start = match.end()
+    spans.append(text[start:])
+    return [span.strip() for span in spans if span.strip()]
 
 
 def rule_candidates(extraction):
@@ -27,7 +53,7 @@ def rule_candidates(extraction):
     by_id = {u["id"]: u for u in units}
     candidates = []
     for unit in units:
-        if not unit["text"].strip() or unit["kind"] in {"formula", "table"}:
+        if not unit["text"].strip() or unit["kind"] in {"formula", "table", "heading"}:
             continue
         if re.search(r"ignore.{0,40}instru|system prompt", unit["text"], re.I):
             continue
@@ -41,34 +67,61 @@ def rule_candidates(extraction):
         )
         if not own and not inherited and not re.search(r"\bprazo\s+é\s+de", unit["text"], re.I):
             continue
-        if (
-            own
-            and unit["text"].rstrip().endswith(":")
-            and any(u["parent"] == unit["id"] for u in units)
-        ):
-            continue
-        context = parent["text"] if inherited else unit["text"]
-        match = DUTY.search(context)
-        subject = context[: match.start()].strip() if match else "não identificado"
-        subject = re.sub(r"^\s*(?:Art\.?\s*\d+[º°]?\.?|§\s*\d+[º°]?)\s*", "", subject)
-        if len(subject) > 180:
-            subject = "não identificado"
-        evidence = [{"unit_id": unit["id"], "quote": unit["text"].strip()}]
-        if inherited:
-            evidence.append({"unit_id": parent["id"], "quote": parent["text"].strip()})
-        candidates.append(
-            {
-                "subject": subject or "não identificado",
-                "modality": modality(context),
-                "action": unit["text"].strip(),
-                "object": "não identificado",
-                "conditions": [m.group() for m in CONDITION.finditer(unit["text"])],
-                "exceptions": [m.group() for m in EXCEPTION.finditer(unit["text"])],
-                "evidence": evidence,
-                "suggested_rules": [],
-            }
-        )
+        pieces = [unit["text"].strip()]
+        if own:
+            deontic = [s for s in sentences(unit["text"]) if DUTY.search(s)]
+            if unit["text"].rstrip().endswith(":") and any(
+                u["parent"] == unit["id"] for u in units
+            ):
+                # A última frase enumera e é herdada pelos filhos; as demais não podem se perder.
+                pieces = deontic[:-1]
+            elif len({modality(s) for s in deontic}) > 1:
+                pieces = deontic  # dever e permissão juntos: um candidato por frase
+        for piece in pieces:
+            context = enumerating(parent["text"]) if inherited else piece
+            candidates.append(
+                {
+                    "subject": subject_of(context),
+                    "modality": modality(context),
+                    "action": piece,
+                    "object": "não identificado",
+                    "conditions": [m.group() for m in CONDITION.finditer(piece)],
+                    "exceptions": [m.group() for m in EXCEPTION.finditer(piece)],
+                    "evidence": [{"unit_id": unit["id"], "quote": piece}]
+                    + (
+                        [{"unit_id": parent["id"], "quote": parent["text"].strip()}]
+                        if inherited
+                        else []
+                    ),
+                    "suggested_rules": [],
+                }
+            )
     return candidates
+
+
+def enumerating(text):
+    """Frase do caput que introduz a enumeração herdada pelos filhos."""
+    last = sentences(text)[-1] if text.strip() else ""
+    return last if DUTY.search(last) else text
+
+
+LEADING_LABEL = re.compile(
+    r'^\s*[“"]?\s*(?:Art\.?\s*\d+(?:-[A-Z])?[º°]?\.?|§\s*\d+[º°]?\.?|Parágrafo único\.?'
+    r"|[IVXLCDM]+\s*[–—-]|[a-z]\)|\d+(?:-[A-Z])?\.)\s*"
+)
+
+
+def subject_of(context):
+    """Sujeito literal antes do verbo, sem rótulo do dispositivo nem oração adverbial inicial."""
+    match = DUTY.search(context)
+    if not match:
+        return "não identificado"
+    subject = LEADING_LABEL.sub("", context[: match.start()]).strip()
+    # "Ao acionar o mecanismo…, a distribuidora cessionária" → "a distribuidora cessionária".
+    head, _, last = subject.rpartition(",")
+    if head and re.match(r"\s*(?:o|a|os|as)\s+\w", last, re.I):
+        subject = last.strip()
+    return "não identificado" if not subject or len(subject) > 180 else subject
 
 
 def validate_item(item, allowed_ids):
@@ -156,7 +209,7 @@ def evaluate(item, extraction, role="norm", target_dates=None, generator="rules"
             )
         )
         explicit_modal = DUTY.search(literal)
-        if explicit_modal and modality(literal) != item["modality"]:
+        if explicit_modal and item["modality"] not in modalities(literal):
             contest(
                 "unsupported_modality",
                 "critical",

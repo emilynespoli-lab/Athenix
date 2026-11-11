@@ -31,6 +31,12 @@ LETTER = re.compile(r"^\s*([a-z])\)\s+")
 ITEM = re.compile(r"^\s*(\d+(?:-[A-Z])?)\.\s+")
 ANNEX = re.compile(r'^\s*[“"]?\s*ANEXO\s+([IVXLCDM\d]+)', re.I)
 TABLE = re.compile(r"^\s*Tabela\s+(\d+)", re.I)
+# Título/Capítulo/Seção sozinho na linha (ou "– Nome"): encerra o dispositivo anterior, para o
+# texto do título não vazar para ele (ex.: "Seção VII Das Sanções e Penalidades" após um §).
+HEADING = re.compile(
+    r'^\s*[“"]?\s*((?:TÍTULO|CAPÍTULO|SEÇÃO|SUBSEÇÃO|Título|Capítulo|Seção|Subseção)\s+'
+    r"(?:[IVXLCDM]+|\d+(?:\.\d+)*))\s*(?:[–—-]\s*[A-ZÀ-Ú][^\n]{0,80})?\s*$"
+)
 ACT = re.compile(
     r"(?:Resolução(?:\s+Normativa)?|Lei|Decreto|Portaria)\s*(?:n[º°o.]*)?\s*[\d.]+(?:/\d{4})?", re.I
 )
@@ -160,7 +166,11 @@ def act_dates(text):
     for match in DATE.finditer(text):
         context = text[max(0, match.start() - 100) : match.start()].lower()
         kind = None
-        if re.search(r"publica(?:d[ao]|ção)|diário oficial|\bdou\b", context):
+        # Pista imediatamente anterior vence: "Brasília, 20 de junho" é assinatura, mesmo após
+        # "entra em vigor na data de sua publicação" na linha de cima.
+        if re.search(r"(?:brasília|assinad[oa] em)\s*,?\s*$", context):
+            kind = "signature"
+        elif re.search(r"publica(?:d[ao]|ção)|diário oficial|\bdou\b", context):
             kind = "publication"
         elif re.search(r"vig[êe]ncia|entra em vigor", context):
             kind = "effective"
@@ -195,9 +205,20 @@ def act_dates(text):
     return found
 
 
+def is_title(line):
+    """Nome de título: maiúsculas ("DA LICITAÇÃO") ou "Das Sanções e Penalidades", sem pontuação final."""
+    line = line.strip()
+    return (
+        len(line) <= 120
+        and line[-1] not in ".;:,"
+        and (line == line.upper() or re.match(r"D[aeo]s?\s", line) is not None)
+    )
+
+
 def segment(text, pages, faq=False):
     markers = []
     quoted, nesting, straight = False, 0, False
+    heading_title = False
     target = None
     stack = []
     offset = 0
@@ -216,6 +237,7 @@ def segment(text, pages, faq=False):
         if question:
             kind, label, depth = "question", question.group(1), 2
         for pattern, candidate_kind, level in (
+            (HEADING, "heading", 0),
             (ARTICLE, "article", 1),
             (PARAGRAPH, "paragraph", 2),
             (ANNEX, "annex", 1),
@@ -234,6 +256,13 @@ def segment(text, pages, faq=False):
                 break
         if not kind and re.search(r"[=∑∫]|\b[fF]\s*\([^)]*\)\s*=", line):
             kind, label, depth = "formula", str(len(markers) + 1), 5
+        # O título guarda só o próprio nome; o texto seguinte sem marcador (ex.: artigo que o HTML
+        # quebrou) abre unidade própria, para não sumir da detecção de obrigações.
+        if kind:
+            heading_title = kind == "heading"
+        elif heading_title and stripped.strip() and not is_title(stripped):
+            kind, label, depth = "unstructured", "Texto após título", 1
+            heading_title = False
         if kind == "letter":
             # No PRODIST as alíneas pertencem ao item numerado; na LC 95 ficam sob o inciso.
             context = next(
@@ -248,7 +277,7 @@ def segment(text, pages, faq=False):
             if context and context["kind"] == "item":
                 depth = context["depth"] + 1
         if kind:
-            if kind != "table" and kind in {"article", "paragraph", "item", "annex"}:
+            if kind in {"article", "paragraph", "item", "annex", "heading"}:
                 in_table = False
             if kind == "table":
                 in_table = True
@@ -266,7 +295,8 @@ def segment(text, pages, faq=False):
                 "start": offset,
             }
             markers.append(marker)
-            stack.append(marker)
+            if kind != "heading":  # título fecha o anterior, mas não vira pai
+                stack.append(marker)
             if owner is None:
                 warnings.append("Bloco citado com norma-alvo não resolvida: " + identifier)
         # Profundidade: “ANEXO 8.C” dentro de um bloco citado não encerra o bloco externo.

@@ -4,24 +4,73 @@ from datetime import date, timedelta
 
 from .structure import DATE, parse_date
 
+NUMBERS = {
+    **dict.fromkeys(("um", "uma"), 1), **dict.fromkeys(("dois", "duas"), 2),
+    **dict.fromkeys(("três", "tres"), 3), "quatro": 4, "cinco": 5, "seis": 6, "sete": 7,
+    "oito": 8, "nove": 9, "dez": 10, "onze": 11, "doze": 12, "treze": 13,
+    **dict.fromkeys(("catorze", "quatorze"), 14), "quinze": 15, "dezesseis": 16,
+    "dezessete": 17, "dezoito": 18, "dezenove": 19, "vinte": 20, "trinta": 30, "quarenta": 40,
+    "cinquenta": 50, "sessenta": 60, "setenta": 70, "oitenta": 80, "noventa": 90,
+    **dict.fromkeys(("cem", "cento"), 100), **dict.fromkeys(("duzentos", "duzentas"), 200),
+    **dict.fromkeys(("trezentos", "trezentas"), 300), "quatrocentos": 400, "quinhentos": 500,
+    "seiscentos": 600, "setecentos": 700, "oitocentos": 800, "novecentos": 900,
+}  # fmt: skip
+_WORD = "|".join(sorted(NUMBERS, key=len, reverse=True))
+# Quantidade em algarismos ("90 (noventa) dias") ou por extenso ("cento e vinte dias").
 PERIOD = re.compile(
-    r"\b(\d+)\s*(?:\([^)]{1,60}\)\s*)?(dias?(?:\s+úteis|\s+corridos)?|meses|mês|anos?)\b", re.I
+    rf"\b(\d+|(?:{_WORD})(?:\s+e\s+(?:{_WORD}))*)\s*(?:\([^)]{{1,60}}\)\s*)?"
+    r"(dias?(?:\s+úteis|\s+corridos)?|meses|mês|anos?)\b",
+    re.I,
+)
+# Publicação/vigência da própria norma ("da publicação", "desta Resolução") × de outro ato
+# ("da publicação das instruções", "da minuta"), que é evento futuro sem data.
+OWN_MARK = re.compile(
+    r"\b(publicação|vigência|entrada em vigor)(?:\s+(dest[ae]|d[aoe]s?)\s+(\w+))?", re.I
+)
+EVENT = re.compile(
+    r"\b(?:contad[oa]s?|a\s+partir|após|antes|advento)\b[^.;]{0,30}?\bd[aoe]s?\s+\w+", re.I
 )
 
 
+MONTH_NAMES = (
+    "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro"
+)
+FREQUENCY = "anual|mensal|semestral|trimestral|bimestral|semanal|diária"
+# Recorrência: "anualmente", "com periodicidade anual", "a cada ano", "em janeiro" (sem ano).
+PERIODIC = re.compile(
+    r"\b(?:(?:anual|mensal|semestral|trimestral|bimestral|semanal|diari)mente"
+    rf"|com\s+periodicidade\s+(?:mínima\s+)?(?:{FREQUENCY})"
+    r"|a\s+cada\s+(?:ano|mês|semestre|trimestre|bimestre|semana)"
+    rf"|(?:em|no\s+mês\s+de)\s+(?:{MONTH_NAMES})(?!\s+de\s+\d{{4}}))\b",
+    re.I,
+)
+
+
+def clause(text, start, end):
+    """Cláusula entre o ponto/ponto e vírgula anterior e o seguinte."""
+    left = max(text.rfind(".", 0, start), text.rfind(";", 0, start)) + 1
+    tail = re.split(r"[.;]", text[end:], maxsplit=1)[0]
+    return text[left:end] + tail
+
+
+def quantity(token):
+    if token.isdigit():
+        return int(token)
+    return sum(NUMBERS[word] for word in re.split(r"\s+e\s+", token.lower()))
+
+
 def landmark(text):
-    lower = text.lower()
-    if re.search(r"publicação\s+d[ao]s?\s+(?:instru|portaria|ato|orienta|procedimento)", lower):
-        return "event", "Publicação de instruções/ato futuro"
-    if re.search(
-        r"(?:após|antes|contad[oa]s?|a partir).{0,25}(?:evento|ocorrência|solicitação|recebimento)",
-        lower,
-    ):
-        return "event", text.strip()
-    if "publicação" in lower:
-        return "publication", "Publicação da norma"
-    if "vigência" in lower or "entrada em vigor" in lower:
-        return "effective", "Vigência da norma"
+    mark = OWN_MARK.search(text)
+    if mark:
+        connector, noun = (mark.group(2) or "").lower(), (mark.group(3) or "").lower()
+        if not connector or connector.startswith("dest") or noun == "presente":
+            if mark.group(1).lower() == "publicação":
+                return "publication", "Publicação da norma"
+            return "effective", "Vigência da norma"
+        return "event", mark.group(0)[:1].upper() + mark.group(0)[1:]
+    event = EVENT.search(text)
+    if event:
+        return "event", event.group(0).strip()
     return "unknown", "Marco não identificado"
 
 
@@ -49,19 +98,19 @@ def rules(text, unit_id, dates, inherited="", clarification=False, target_dates=
     for index, match in enumerate(periods):
         left = max(text.rfind(".", 0, match.start()) + 1, text.rfind(";", 0, match.start()) + 1)
         end = periods[index + 1].start() if index + 1 < len(periods) else len(text)
-        # A semicolon or sentence end closes this temporal clause.
-        tail = re.split(r"[.;\n]", text[match.end() : end], maxsplit=1)[0]
+        # Ponto ou ponto e vírgula fecham a cláusula; quebra de linha do PDF/HTML não.
+        tail = re.split(r"[.;]", text[match.end() : end], maxsplit=1)[0]
         local = text[left : match.end()] + tail
         kind, label = landmark(local)
         inherited_used = False
         if kind == "unknown" and inherited:
             kind, label = landmark(inherited)
             inherited_used = kind != "unknown"
-        quantity, unit = int(match.group(1)), match.group(2).lower()
-        direction = -1 if re.search(r"\bantes\b", local, re.I) else 1
+        amount, unit = quantity(match.group(1)), match.group(2).lower()
+        direction = -1 if re.search(r"\bantes\b|\bantecedência\b", local, re.I) else 1
         record = {
             "unit_id": unit_id,
-            "quantity": quantity,
+            "quantity": amount,
             "unit": unit,
             "landmark": kind,
             "event": label,
@@ -84,7 +133,7 @@ def rules(text, unit_id, dates, inherited="", clarification=False, target_dates=
         else:
             try:
                 record["date"] = compute(
-                    quantity, unit, date.fromisoformat(base), direction
+                    amount, unit, date.fromisoformat(base), direction
                 ).isoformat()
                 record["state"] = "provisional"
                 record["base"] = base
@@ -92,11 +141,29 @@ def rules(text, unit_id, dates, inherited="", clarification=False, target_dates=
             except (ValueError, OverflowError):
                 reason = "Quantidade fora do intervalo suportado"
         record["explanation"] = (
-            f"{quantity} {unit}; marco: {label}; base: {base or 'desconhecida'}; "
+            f"{amount} {unit}; marco: {label}; base: {base or 'desconhecida'}; "
             f"direção: {'antes' if direction < 0 else 'após'}; "
             f"convenção: exclui início, mês limitado ao último dia (v1). {reason}."
         )
         result.append(record)
+    for match in PERIODIC.finditer(text):
+        result.append(
+            {
+                "unit_id": unit_id,
+                "quantity": None,
+                "unit": "periodic",
+                "landmark": "recurring",
+                "event": match.group(0),
+                "quote": clause(text, match.start(), match.end()).strip(),
+                "direction": 1,
+                "convention": "periodic_v1",
+                "inherited": False,
+                "date": None,
+                "state": "recurring",
+                "explanation": f"Obrigação recorrente ({match.group(0)}); próxima ocorrência "
+                "não calculada sem calendário de referência.",
+            }
+        )
     if not periods:
         for match in DATE.finditer(text):
             parsed = parse_date(match)
