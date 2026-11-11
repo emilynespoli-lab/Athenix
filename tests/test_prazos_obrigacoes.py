@@ -5,7 +5,7 @@ import pytest
 from athenix.config import Settings
 from athenix.poc import reader
 from athenix.poc.semantic import deterministic_items
-from athenix.structure import act_dates, extract
+from athenix.structure import act_dates, extract, segment
 from athenix.temporal import landmark, rules
 from scripts.avaliar import quality, sources
 
@@ -125,3 +125,34 @@ def test_real_reh_january_report_is_recurring():
                 and i["interpretation"]["unit"] == "periodic"]  # fmt: skip
     # Antes: 0 prazos recorrentes; o § 1º do Art. 3º (informar "em janeiro") ficava sem prazo.
     assert "em janeiro" in periodic
+
+
+def test_heading_closes_previous_unit_and_is_not_penalty():
+    text = (
+        "Art. 1º A distribuidora deve manter canais exclusivos.\n"
+        "Seção VII\nDas Sanções e Penalidades\n"
+        "Art. 2º Constitui infração o descumprimento do art. 1º.\n"
+        "Seção 4.9 deste Módulo, as distribuidoras devem seguir o plano.\n"
+    )
+    units, _ = segment(text, [{"number": 1, "start": 0, "end": len(text)}])
+    by_label = {u["label"]: u for u in units}
+    assert "Penalidades" not in by_label["1º"]["text"]
+    assert by_label["Seção VII"]["kind"] == "heading" and by_label["2º"]["parent"] is None
+    assert "Seção 4.9" not in by_label  # frase quebrada no início da linha não é título
+
+
+def test_real_penalty_only_from_own_text(ren):
+    _, items = ren
+    penalties = [i for i in items if i["type"] == "penalty"]
+    # Antes: 4 (o § 7º do Art. 371-A herdava "Seção VII Das Sanções e Penalidades"). Depois: 3.
+    assert len(penalties) == 3
+    assert all("Constitui infração" in i["literal_text"] for i in penalties)
+
+
+def test_heading_never_swallows_normative_text():
+    # Art. quebrado pelo HTML ("Art. \n 2º") após o título não pode sumir da detecção.
+    text = "CAPÍTULO I\nDOS CRITÉRIOS DE\nAVALIAÇÃO\nArt. \n\t2º A concessionária deverá enviar os dados anuais.\n"
+    units, _ = segment(text, [{"number": 1, "start": 0, "end": len(text)}])
+    heading = next(u for u in units if u["kind"] == "heading")
+    assert "deverá" not in heading["text"] and "AVALIAÇÃO" in heading["text"]
+    assert any("deverá" in u["text"] and u["kind"] != "heading" for u in units)

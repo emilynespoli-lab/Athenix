@@ -25,6 +25,7 @@ LABEL = {
     "table": "Tabela {}",
     "formula": "fórmula {}",
     "question": "pergunta {}",
+    "heading": "{}",
 }
 # Tipos não deônticos, detectados por padrão literal; sem interpretação além do tipo.
 TYPES = (
@@ -157,7 +158,8 @@ def deterministic_items(doc, extraction, pages):
             )
     for unit in units:
         for kind, pattern in TYPES:
-            if unit["text"].strip() and pattern.search(unit["text"]):
+            # Penalidade/revogação só com base no próprio dispositivo, nunca num título.
+            if unit["kind"] != "heading" and pattern.search(unit["text"]):
                 anchor = _anchor(unit, extraction)
                 items.append(_item(doc, extraction, pages, unit, kind, [anchor], None, [], "rules"))
         for match in REF.finditer(unit["text"]):

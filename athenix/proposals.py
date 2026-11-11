@@ -27,7 +27,7 @@ def rule_candidates(extraction):
     by_id = {u["id"]: u for u in units}
     candidates = []
     for unit in units:
-        if not unit["text"].strip() or unit["kind"] in {"formula", "table"}:
+        if not unit["text"].strip() or unit["kind"] in {"formula", "table", "heading"}:
             continue
         if re.search(r"ignore.{0,40}instru|system prompt", unit["text"], re.I):
             continue
