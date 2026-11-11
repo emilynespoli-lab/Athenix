@@ -1,0 +1,30 @@
+{% macro pct(v) %}{{ ('%.4f'|format(v)).rstrip('0').rstrip('.')|replace('.', ',') }}%{% endmacro %}
+{% macro money(v) %}{{ fmt_reais(v) }}{% endmacro %}
+
+{% macro cenarios(m, chave, base) %}{% set v = m[chave] %}{% if v %}<span class="scenario">com teto: <b>{{pct(v.com_teto)}}</b>{% if base is not none %} · {{money(v.com_teto / 100 * base)}}{% endif %}</span><span class="scenario">sem teto: <b>{{pct(v.sem_teto)}}</b>{% if base is not none %} · {{money(v.sem_teto / 100 * base)}}{% endif %}</span><small class="interpretation">depende de interpretação (D5)</small>{% endif %}{% endmacro %}
+
+{% macro citacao(row) %}{% set a = row.anchors|selectattr('state','equalto','verified')|first %}{% if a %}<blockquote class="cite">“{{a.quote[:260]}}{% if a.quote|length > 260 %}…{% endif %}”</blockquote><small><a href="/documents/{{row.document_id}}#{{a.unit_id}}">{{row.document_title}} · ver no documento</a> · <a href="/obligations/{{row.id}}">ficha da obrigação</a></small>{% else %}<small class="warning-text">Sem citação verificada.</small>{% endif %}{% endmacro %}
+
+{% macro linha(i, base, editavel) %}{% set m = i.multa %}<tr>
+<td>{% if i.rank %}<b class="rank">{{i.rank}}</b>{% endif %}<a class="row-link" href="/obligations/{{i.row.id}}">{{i.row.action[:200]}}{% if i.row.action|length > 200 %}…{% endif %}</a><small>{{i.row.subject}} · {{i.row.modality|label}}</small>{{citacao(i.row)}}</td>
+<td>{% for c, motivo in i.categorias %}<span class="badge cat-{{c}}">{{categorias[c]}}</span><small>{{motivo}}</small>{% endfor %}</td>
+<td>{% if m and m.estimavel %}{% if i.enquadramentos %}{% for e in i.enquadramentos %}<small><b>{{e.dispositivo}} da REN 846 (Grupo {{e.grupo}})</b>: “{{e.trecho[:160]}}{% if e.trecho|length > 160 %}…{% endif %}”</small>{% endfor %}{% else %}<small>Sem infração tipificada com os mesmos termos: considerados os grupos {{m.grupos|join(', ')}}.</small>{% endif %}{% if editavel %}<label class="inline">Enquadramento (premissa)<select name="grupo_{{i.row.id}}"><option value="">{{ 'Indicado pelo texto' if i.enquadramentos else 'Desconhecido (todos)' }}</option>{% for g in grupos %}<option value="{{g}}" {% if perfil.grupos.get(i.row.id) == g %}selected{% endif %}>Grupo {{g}}</option>{% endfor %}</select></label>{% endif %}{% else %}<small>{{m.motivo if m else 'Sem multa associada.'}}</small>{% endif %}</td>
+<td>{% if m and m.estimavel %}<small>Mínimo: <b>0</b></small><small>Provável:</small>{% if m.provavel %}{{cenarios(m,'provavel',base)}}{% else %}<small class="warning-text">{{m.motivo_provavel}}</small>{% endif %}<small>Máximo:</small>{{cenarios(m,'maximo',base)}}{% if base is none %}<small class="warning-text">Informe a base de cálculo para ver em R$.</small>{% endif %}{% else %}<small>Não estimável</small>{% endif %}</td>
+<td>{{i.urgencia.texto}}</td>
+<td><span class="badge conf-{{i.confianca}}">{{i.confianca}}</span><small>{{i.motivo_confianca}}</small>{% if m and m.premissas %}<details><summary>Premissas ({{m.premissas|length}})</summary><ul class="premissas">{% for pr in m.premissas %}<li>{{pr.texto}}{% if pr.parametro %} <small>fonte: {{params.parametros[pr.parametro].dispositivo if pr.parametro in params.parametros else pr.parametro}} da REN 846</small>{% endif %}{% if pr.nota %}<small>{{pr.nota}}</small>{% endif %}</li>{% endfor %}</ul></details>{% endif %}</td>
+</tr>{% endmacro %}
+
+{% macro cabecalho_tabela() %}<thead><tr><th>Obrigação e citação</th><th>Consequência</th><th>Enquadramento</th><th>Faixa (% da base · R$)</th><th>Prazo</th><th>Confiança e premissas</th></tr></thead>{% endmacro %}
+
+{% macro alertas(alteracoes, params) %}
+{% for a in alteracoes %}<div class="callout warning"><strong>Esta norma altera a régua de penalidade.</strong> {{a.title}} muda a REN 846/2019: “{{a.quote[:220]}}{% if a.quote|length > 220 %}…{% endif %}” <a href="/documents/{{a.document_id}}#{{a.unit_id}}">ver dispositivo</a>. Os enquadramentos abaixo usam o texto compilado, que já inclui esta alteração; confira a vigência.</div>{% endfor %}
+{% for d in params.duvidas %}{% if d.id == 'D1' %}<div class="callout"><strong>Dúvida para especialista ({{d.dispositivo}} da REN 846).</strong> {{d.texto}}<ul>{% for l in d.leituras %}<li><b>{{l.ato}}</b>, vigente desde {{l.vigencia_desde|data_br or 'data a conferir'}}: “{{l.trecho}}”</li>{% endfor %}</ul></div>{% elif d.id == 'D5' %}<div class="callout"><strong>Interpretação em aberto ({{d.dispositivo}}).</strong> {{d.texto}} “Com teto” limita o resultado após agravantes ao teto do grupo; “sem teto” não limita.</div>{% endif %}{% endfor %}
+{% for a in params.alertas_fonte %}<div class="callout warning"><strong>Inconsistência na fonte.</strong> {{a.ato}}, {{a.dispositivo}}: {{a.detalhe}} — “{{a.trecho}}”. Nenhum dos dois valores é usado sem decisão humana.</div>{% endfor %}
+{% endmacro %}
+
+{% macro fontes(params) %}
+<div class="table-wrap"><table><thead><tr><th>Ato</th><th>Arquivo · SHA-256</th><th>Origem</th></tr></thead><tbody>{% for k, f in params.fontes.items() %}<tr><td>{{f.titulo}}</td><td><code>{{f.arquivo}}</code><small><code>{{f.sha256}}</code></small></td><td>{{f.origem}}</td></tr>{% endfor %}</tbody></table></div>
+<p class="small">PDFs do Leis.org não estão no repositório público (termos de uso em confirmação); o arquivo de parâmetros guarda o trecho literal e o hash de cada fonte.</p>
+<details><summary>Parâmetros usados ({{params.parametros|length}})</summary><div class="table-wrap"><table><thead><tr><th>Parâmetro</th><th>Dispositivo</th><th>Trecho literal</th><th>Âncora</th></tr></thead><tbody>{% for k, p in params.parametros.items() %}<tr><td>{{p.descricao}}</td><td>{{p.dispositivo}}</td><td>“{{p.trecho}}”</td><td>{{p.ancora|label}}{% if p.nota %}<small>{{p.nota}}</small>{% endif %}</td></tr>{% endfor %}</tbody></table></div></details>
+<h3>Não estimável</h3><ul>{% for n in params.nao_estimaveis %}<li>{{n}}</li>{% endfor %}</ul>
+{% endmacro %}

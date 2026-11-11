@@ -33,6 +33,7 @@ from .db import (
     verify_chain,
 )
 from .evidence import recheck
+from . import impacto
 from .llm import estimate
 from .services import (
     associate_dependency,
@@ -146,6 +147,8 @@ def create_app(settings=None, embedded_worker=False):
     templates = Jinja2Templates(directory=str(ROOT / "templates"))
     templates.env.filters["label"] = lambda value: LABELS.get(value, value)
     templates.env.filters["pretty"] = lambda value: json.dumps(value, ensure_ascii=False, indent=2)
+    templates.env.globals["fmt_reais"] = impacto.reais
+    templates.env.filters["data_br"] = lambda v: "/".join(reversed(v.split("-"))) if v else v
     app.mount("/static", StaticFiles(directory=str(ROOT / "static")), name="static")
 
     @app.middleware("http")
@@ -679,6 +682,66 @@ def create_app(settings=None, embedded_worker=False):
             ]
             deadlines.sort(key=lambda d: d.get("date") or "9999")
             return render(request, session, "timeline", deadlines=deadlines)
+
+    def impacto_contexto(session, query):
+        params = impacto.carregar()
+        perfil = impacto.perfil(query)
+        rows = obligations(session)
+        resultado = impacto.avaliar(params, rows, perfil)
+        for posicao, item in enumerate(resultado["ranking"], start=1):
+            item["rank"] = posicao
+        alteracoes, documentos = [], {}
+        for row in rows:
+            documentos.setdefault(row["document_id"], row["document_title"])
+        for document_id, title in documentos.items():
+            units = extraction_data(session, document_id)["units"]
+            for unit in impacto.alteracoes_da_regua(units):
+                alteracoes.append(
+                    {
+                        "document_id": document_id,
+                        "title": title,
+                        "unit_id": unit["id"],
+                        "quote": " ".join(unit["text"].split()),
+                    }
+                )
+        return {
+            "params": params,
+            "perfil": perfil,
+            "resultado": resultado,
+            "alteracoes": alteracoes,
+            "documentos": list(documentos.values()),
+            "categorias": impacto.CATEGORIAS,
+            "grupos": impacto.GRUPOS,
+        }
+
+    @app.get("/impacto", response_class=HTMLResponse)
+    def impacto_page(request: Request):
+        with factory() as session:
+            guard(request, session)
+            context = impacto_contexto(session, request.query_params)
+            return render(request, session, "impact", **context)
+
+    @app.get("/impacto/relatorio", response_class=HTMLResponse)
+    def impacto_relatorio(request: Request):
+        with factory() as session:
+            guard(request, session)
+            context = impacto_contexto(session, request.query_params)
+        download = bool(request.query_params.get("download"))
+        return templates.TemplateResponse(
+            request=request,
+            name="impacto_relatorio.html",
+            context=context
+            | {
+                "gerado_em": time.strftime("%d/%m/%Y %H:%M"),
+                # Arquivo baixado abre fora do app: leva o CSS junto.
+                "css": (ROOT / "static" / "app.css").read_text(encoding="utf-8")
+                if download
+                else "",
+            },
+            headers={"Content-Disposition": 'attachment; filename="relatorio_impacto.html"'}
+            if download
+            else None,
+        )
 
     @app.post("/obligations/{interpretation_id}/findings")
     @app.post("/api/obligations/{interpretation_id}/findings")

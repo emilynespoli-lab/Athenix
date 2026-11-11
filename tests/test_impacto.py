@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from athenix import impacto
+from conftest import propose
 
 PARAMS = impacto.carregar()
 HOJE = "2026-11-11"
@@ -162,3 +163,23 @@ def test_profile_validation(form):
 def test_brazilian_number_format():
     assert impacto.perfil({"base": "R$ 1.234.567,89"})["base"] == pytest.approx(1234567.89)
     assert impacto.perfil({"data_referencia": HOJE})["data_referencia"] == date(2026, 11, 11)
+
+
+def test_rule_change_alert_and_screens(env):
+    app, client, settings = env
+    norma = (
+        "<html><body><p>Art. 1º A distribuidora deve manter Plano de Contingência atualizado.</p>"
+        "<p>Art. 2º A Resolução Normativa nº 846, de 11 de junho de 2019, passa a vigorar com a "
+        "seguinte redação:</p></body></html>"
+    ).encode()
+    propose(env, norma)
+    page = client.get("/impacto?base=1000000&segmento=distribuicao")
+    assert page.status_code == 200
+    assert "altera a régua de penalidade" in page.text and "Art. 12, XXVI" in page.text
+    assert "Leis.org" in page.text and impacto.AVISO in page.text
+    report = client.get("/impacto/relatorio?base=1000000&download=1")
+    assert report.status_code == 200 and "attachment" in report.headers["content-disposition"]
+    assert report.text.count(impacto.AVISO) >= 2
+    assert client.get("/impacto?base=-5").status_code == 400
+    client.cookies.clear()
+    assert client.get("/impacto").status_code == 401
