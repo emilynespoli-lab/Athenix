@@ -160,7 +160,11 @@ def act_dates(text):
     for match in DATE.finditer(text):
         context = text[max(0, match.start() - 100) : match.start()].lower()
         kind = None
-        if re.search(r"publica(?:d[ao]|ção)|diário oficial|\bdou\b", context):
+        # Pista imediatamente anterior vence: "Brasília, 20 de junho" é assinatura, mesmo após
+        # "entra em vigor na data de sua publicação" na linha de cima.
+        if re.search(r"(?:brasília|assinad[oa] em)\s*,?\s*$", context):
+            kind = "signature"
+        elif re.search(r"publica(?:d[ao]|ção)|diário oficial|\bdou\b", context):
             kind = "publication"
         elif re.search(r"vig[êe]ncia|entra em vigor", context):
             kind = "effective"
