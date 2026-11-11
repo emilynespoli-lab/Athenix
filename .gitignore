@@ -10,3 +10,5 @@ __pycache__/
 artifacts/
 *.egg-info/
 playwright-report/
+# PDFs do Leis.org: fora do repositório público até confirmar os termos de uso
+tests/fontes_impacto/*.pdf

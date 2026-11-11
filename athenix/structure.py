@@ -24,7 +24,8 @@ LEGACY = {"iso-8859-1", "iso8859-1", "latin1", "latin-1", "l1", "cp819", "ascii"
 SUSPECT = re.compile("�|Ã[\u0080-¿]|Â[\u0080-¿]|â€|[Ā-ſ]")
 SUSPECT_LIMIT = 3  # shortcut: limiar fixo; calibrar com corpus rotulado se entrarem textos não PT
 
-ARTICLE = re.compile(r'^\s*[“"]?\s*Art\.?\s*(\d+(?:[º°])?(?:-[A-Z])?)\.?\s*', re.I)
+# "Art." / "ART." abre artigo; "art." minúsculo no início da linha é remissão quebrada (LC 95/1998).
+ARTICLE = re.compile(r'^\s*[“"]?\s*(?:Art|ART)\.?\s*(\d+(?:[º°])?(?:-[A-Z])?)\.?\s*')
 PARAGRAPH = re.compile(r'^\s*[“"]?\s*(§\s*\d+[º°]?|Parágrafo único)\.?\s*', re.I)
 CLAUSE = re.compile(r"^\s*([IVXLCDM]+)\s*[–—-]\s+")
 LETTER = re.compile(r"^\s*([a-z])\)\s+")

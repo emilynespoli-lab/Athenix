@@ -1,0 +1,48 @@
+{
+ "nota": "Atos oficiais (Lei 9.610/1998, art. 8º, IV). Arquivos fornecidos pelo fundador em 11/11/2026; nenhum conteúdo editado. Hashes calculados na entrada no repositório.",
+ "ressalva_origem": "O fundador informou download do site da ANEEL, mas o rodapé de todas as páginas diz 'Leis.org/aneel - ... Gerado em: <data>': são compilações de terceiro (Leis.org), não o PDF da ANEEL. Tratar como fonte secundária até conferir com o texto da ANEEL/DOU. Riscos conhecidos: texto revogado aparece riscado na mesma página (o texto extraído contém as duas redações) e o selo 'Art. N' é lido fora de lugar pelo pypdfium2.",
+ "documentos": [
+  {
+   "id": "ren2019846",
+   "arquivo": "ren2019846_compilada.pdf",
+   "nome_original": "Resolucao-normativa-846-2019-Aneel-BR-consolidada-[27-10-2026].pdf",
+   "sha256": "d8b6fae9322fbb01e903f9fcb65fcf0f79155ad95f5cb3f5eb86592cada4d21a",
+   "ato": "Resolução Normativa ANEEL nº 846, de 11 de junho de 2019 (texto compilado)",
+   "compilado_ate": "Resolução Normativa nº 1174/2026 de 27/10/2026 (lista de alteradores ao fim do PDF)",
+   "gerado_em": "04/11/2026 15:04:20 (rodapé)",
+   "publicacao_original": "D.O. de 18.06.2019, seção 1, p. 37, v. 157, nº 116 (nota ao fim do texto)",
+   "paginas": 46,
+   "fonte": "secundaria"
+  },
+  {
+   "id": "ren20261148",
+   "arquivo": "ren20261148.pdf",
+   "nome_original": "Resolucao-normativa-1148-2026-Aneel-BR.pdf",
+   "sha256": "00f8c4a41605a697eddac3be1ec916e4017bf78f2f1480162749f52dd6f801cb",
+   "ato": "Resolução Normativa ANEEL nº 1.148, de 27 de janeiro de 2026",
+   "gerado_em": "28/08/2026 14:09:34 (rodapé)",
+   "publicacao_original": "D.O. de 20.02.2026, seção 1, p. 84, v. 164, nº 34",
+   "vigencia_declarada": "1º de janeiro de 2027 (Art. 10)",
+   "paginas": 15,
+   "fonte": "secundaria",
+   "ressalva": "Anexos (Submódulos 2.5 e 2.5-A do PRORET, versões 5.0 e 4.0) não estão no arquivo."
+  },
+  {
+   "id": "ren20261174",
+   "arquivo": "ren20261174.pdf",
+   "nome_original": "Resolucao-normativa-1174-2026-Aneel-BR-consolidada-[27-10-2026].pdf",
+   "sha256": "a2f89f9e431eb9dfc0122d0a646ade8711791434e2c6515c5c91e41d62f38e53",
+   "ato": "Resolução Normativa ANEEL nº 1.174, de 27 de outubro de 2026 (texto compilado)",
+   "gerado_em": "04/11/2026 11:15:15 (rodapé)",
+   "publicacao_original": "D.O. de 04.11.2026, seção 1, p. 68, v. 164, nº 207",
+   "paginas": 32,
+   "fonte": "secundaria",
+   "ressalva": "Anexos II e III (Submódulos 1.6 e 1.8 dos Procedimentos de Comercialização) não estão no arquivo."
+  }
+ ],
+ "ausentes": [
+  "REN 1.162/2026 (altera arts. 9º, 10 e 21 § 11 da REN 846 segundo o compilado; arquivo não fornecido)",
+  "Despacho nº 1.293/2026 (citado no cabeçalho do compilado; arquivo não fornecido)",
+  "Norma de Parcela Variável (PVI/PVRO) das transmissoras (citada no Art. 13, XIII, da REN 846; arquivo não fornecido)"
+ ]
+}

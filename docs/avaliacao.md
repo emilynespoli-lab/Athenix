@@ -47,6 +47,7 @@ na fonte, extraída sem o segmentador do sistema.
 | `fase2` | prazo "têm N dias", datas, aspas aninhadas, vigência | 11/20 | 3/364 · 1/31 · 124/128 | 256/259 · 28/29 · 4/92 |
 | `item0` | decodificação HTML (BOM → cabeçalho → meta → UTF-8 → windows-1252), detector de mojibake, citação confirmada por segunda leitura | 13/20 | **0/360 · 0/30 · 0/160** | 256/258 · 29/29 · 126/126 |
 | `etapa1` | prazos por extenso, publicação própria × outro evento, assinatura × publicação, prazo herdado sem duplicar, obrigação periódica, título encerra dispositivo, dever + permissão por frase, sujeito sem rótulo | 18/20 | 0/336 · 0/32 · 0/173 | 252/254 · 31/31 · 140/140 |
+| `art-minusculo` | "art." minúsculo no início da linha é remissão, não artigo | 19/20 | 0 · 0 · 0 | 252/254 · 31/31 · 145/145 |
 
 Em `etapa1`, na RN 1.137: prazos duplicados 12 → 0, sujeitos com rótulo ("132.", "a)") 135 → 0, penalidades 4 → 3 (as 3 restantes são "Constitui infração" da RN 846), prazos recorrentes 0 → 2. Decreto: sujeitos com rótulo 9 → 0.
 
@@ -88,8 +89,8 @@ Itens da revisão técnica fora do escopo atual (decisão de 11/11/2026: prioriz
 
 1. **Identidade do arquivo**: SHA-256, assinatura `%PDF-` e limite de tamanho existem; falta marcar "apenas layout" por hash do texto normalizado e registrar falha de download.
 2. **Extração**: offsets e avisos por página e motor registrado existem; falta NFC na extração e mapa de posição da normalização.
-3. **Ruído de layout**: não tratado (sumário colado na ementa, "1. ......", rodapé web, hifenização, cabeçalho repetido, duas colunas, HTML que quebra linha em cada tag e separa "Art." do número).
-4. **Estrutura**: "art. N" no início de linha vira artigo falso; ordinais 5o/5º/5°, validação de inciso romano, itens fora de anexos, caminhos duplicados e separação de epígrafe/ementa não tratados.
+3. **Ruído de layout**: não tratado (rodapé "Leis.org/aneel" e número de página dentro do dispositivo, texto riscado das redações revogadas lido como vigente em textos compilados, sumário colado na ementa, "1. ......", rodapé web, hifenização, cabeçalho repetido, duas colunas, HTML que quebra linha em cada tag e separa "Art." do número).
+4. **Estrutura**: "art. N" minúsculo no início de linha corrigido (`art-minusculo`); ordinais 5o/5º/5°, validação de inciso romano, itens fora de anexos, caminhos duplicados e separação de epígrafe/ementa não tratados.
 5. **Blocos de alteração**: aspas aninhadas e "(NR)" tratados; falta fechar no próximo artigo próprio ou título, norma-alvo só pelo caput ("INDETERMINADO") e marcas explícitas de inclusão/revogação.
 6. **Tabelas**: marcador "Tabela N" existe; unidade anterior ainda engole a tabela seguinte (itens 23-G/23-H) e não há reconstrução de células.
 7. **FAQ**: perguntas separadas e origem "esclarecimento" marcada; "Publicado em/Atualizado em" não capturados.
@@ -101,6 +102,5 @@ Itens da revisão técnica fora do escopo atual (decisão de 11/11/2026: prioriz
 
 | Casos | Causa |
 | --- | --- |
-| G18 (Decreto) | HTML quebra linha em cada tag e separa "Art." do número (item 3): o Art. 22 não vira dispositivo próprio, então revogação e autoria falham. |
 | G09 | Remissões nunca resolvidas (item 8); a divergência "20 de julho" × "20 de junho" do Decreto citado passa sem alerta (item 12). |
 | — | Sujeito com oração relativa no Decreto ("…à concessionária, que"): o sujeito correto está contido, mas não isolado. |
