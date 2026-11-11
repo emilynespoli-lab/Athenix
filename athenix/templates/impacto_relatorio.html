@@ -1,0 +1,37 @@
+<!doctype html>
+{% import 'impacto_macros.html' as im with context %}
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relatório de impacto regulatório · Athenix</title>{% if css %}<style>{{css}}</style>{% else %}<link rel="stylesheet" href="/static/app.css">{% endif %}</head>
+<body class="report">
+<main id="main">
+<div class="callout warning"><strong>{{resultado.aviso}}</strong></div>
+<div class="eyebrow">ATHENIX · RELATÓRIO DE IMPACTO E PRIORIDADE</div>
+<h1>Impacto regulatório estimado</h1>
+<p>Gerado em {{gerado_em}} · data de referência {{perfil.data_referencia.strftime('%d/%m/%Y')}} · documentos: {% for d in documentos %}{{d}}{% if not loop.last %}; {% endif %}{% endfor %}.</p>
+<p class="small">Para PDF, use “Imprimir → Salvar como PDF” no navegador. Parâmetros de penalidade extraídos de compilação do Leis.org (fonte secundária), não do PDF oficial da ANEEL. Obrigações e interpretações não foram revisadas por especialista, salvo indicação na ficha de cada uma.</p>
+
+<h2>Premissas do perfil</h2>
+<table class="kv"><tbody>
+<tr><th>Segmento</th><td>{{ {'distribuicao':'Distribuição','transmissao':'Transmissão'}.get(perfil.segmento, 'não informado (todas as obrigações consideradas aplicáveis)') }}</td></tr>
+<tr><th>Base de cálculo</th><td>{% if perfil.base is not none %}{{im.money(perfil.base)}} — {{resultado.base.nome}}, informada pelo usuário{% else %}não informada: resultados em % da base ({{resultado.base.nome}}){% endif %} <small>fonte: {{params.parametros[resultado.base.parametro].dispositivo}} da REN 846</small></td></tr>
+<tr><th>Agravantes</th><td>{{perfil.reincidencias}} reincidência(s) · {{perfil.tn_nao_atendidos}} TN não atendido(s) · {{perfil.antecedentes}} antecedente(s){% if perfil.soma_antecedentes_pct is not none %} (soma {{im.pct(perfil.soma_antecedentes_pct)}}){% endif %}</td></tr>
+<tr><th>Atenuante esperada</th><td>{{perfil.atenuante}}</td></tr>
+<tr><th>Valor base (% do teto)</th><td>{% if perfil.fracao_valor_base is not none %}{{im.pct(perfil.fracao_valor_base)}}{% else %}não informado: valor provável não estimável{% endif %}</td></tr>
+<tr><th>Enquadramentos escolhidos</th><td>{{perfil.grupos|length}} obrigação(ões) com grupo informado pelo usuário</td></tr>
+</tbody></table>
+
+{{im.alertas(alteracoes, params)}}
+
+{% if resultado.frases %}<h2>Decisão sugerida pela regra de prioridade</h2><ol>{% for f in resultado.frases %}<li>{{f}}</li>{% endfor %}</ol><p class="small">Regra: vencidas primeiro, depois as que vencem em até 90 dias, depois as demais e por fim as sem data; dentro de cada faixa, maior exposição (provável, se informada; senão máxima), no cenário sem teto.</p>{% endif %}
+
+<h2>Obrigações priorizadas ({{resultado.ranking|length}})</h2>
+<table>{{im.cabecalho_tabela()}}<tbody>{% for i in resultado.ranking %}{{im.linha(i, perfil.base, false)}}{% endfor %}</tbody></table>
+
+<h2>Fora da prioridade ({{resultado.itens|rejectattr('rank')|list|length}})</h2>
+<table>{{im.cabecalho_tabela()}}<tbody>{% for i in resultado.itens if not i.rank %}{{im.linha(i, perfil.base, false)}}{% endfor %}</tbody></table>
+
+<h2>Fontes, parâmetros e o que não é estimável</h2>
+{{im.fontes(params)}}
+<div class="callout warning"><strong>{{resultado.aviso}}</strong></div>
+</main>
+</body></html>

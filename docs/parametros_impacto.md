@@ -7,6 +7,22 @@ leitura independente do PDF (pypdfium2).
 
 **Isto não é parecer jurídico.** O documento não foi revisado por especialista.
 
+## Decisões do fundador (11/11/2026)
+
+- **D4, resolvida:** redação riscada no PDF fica fora da interpretação e do cálculo. A extração marca
+  os dispositivos revogados (risco em ≥ 90% do texto) ou com risco parcial; os dois ficam com âncora
+  pendente e não geram obrigação. Na REN 846: 12 revogados, 0 parciais (`tests/test_redacao_revogada.py`).
+- **D5:** não decidida. O módulo calcula e mostra os dois cenários ("com teto" e "sem teto"),
+  marcados como "depende de interpretação".
+- **D1:** dúvida para especialista. A tela mostra as duas leituras do inciso XXIII, com a vigência de
+  cada uma.
+- **D2 e D3:** alertas de inconsistência da fonte (D2 já aparece na tela de impacto; D3 entra na demo).
+- **Fonte:** PDFs do Leis.org (fonte secundária), aviso visível na tela e no relatório; fora do
+  repositório público até confirmar os termos de uso.
+- **REN 1.162, Despacho 1.293 e norma de Parcela Variável:** seguem como "não estimável".
+
+Os parâmetros usados pelo módulo estão em `athenix/data/penalidades_ren846.json` (ver `docs/impacto.md`).
+
 ## Fontes
 
 Os hashes e a proveniência estão em `tests/fontes_impacto/fontes.json`, conferidos por
@@ -122,7 +138,7 @@ confiança baixa.
 - **D3 – Data citada de forma diferente dentro da própria RN 1.137.** A ementa cita a "REN nº 948, de
   16 de novembro de 2021"; o Art. 1º cita a "nº 948, de 21 de novembro de 2021". Não afeta a multa.
   Entra no alerta de inconsistência da fonte (item 12).
-- **D4 – Redações revogadas aparecem como texto válido.**
+- **D4 – Redações revogadas aparecem como texto válido** (resolvida; ver acima).
   - No compilado, as redações antigas estão riscadas: Art. 21, §§ 8º e 9º; Art. 38, § 2º; Art. 11, X;
     Art. 9º, IV e VII; Art. 10, VII, XII e XIX.
   - O texto extraído não guarda o risco. O pipeline cita as duas redações e as duas são "verificadas",

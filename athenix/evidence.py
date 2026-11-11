@@ -52,6 +52,12 @@ def verify(quote, unit_id, units, text_hash, minimum=16, source=None):
     }
     if not unit:
         return result | {"reason": "unidade inexistente"}
+    if unit.get("struck"):
+        reason = {
+            "revoked": "redação revogada (texto riscado no PDF): fora da interpretação",
+            "partial": "texto riscado no PDF: redação vigente incerta, requer conferência visual",
+        }[unit["struck"]]
+        return result | {"state": "pending", "reason": reason}
     normalized_quote, _ = normalize(quote)
     if len(normalized_quote.strip()) < minimum:
         return result | {"state": "pending", "reason": "trecho curto demais"}

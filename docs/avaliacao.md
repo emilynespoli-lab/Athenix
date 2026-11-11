@@ -89,7 +89,7 @@ Itens da revisão técnica fora do escopo atual (decisão de 11/11/2026: prioriz
 
 1. **Identidade do arquivo**: SHA-256, assinatura `%PDF-` e limite de tamanho existem; falta marcar "apenas layout" por hash do texto normalizado e registrar falha de download.
 2. **Extração**: offsets e avisos por página e motor registrado existem; falta NFC na extração e mapa de posição da normalização.
-3. **Ruído de layout**: não tratado (rodapé "Leis.org/aneel" e número de página dentro do dispositivo, texto riscado das redações revogadas lido como vigente em textos compilados, sumário colado na ementa, "1. ......", rodapé web, hifenização, cabeçalho repetido, duas colunas, HTML que quebra linha em cada tag e separa "Art." do número).
+3. **Ruído de layout**: texto riscado (redação revogada em PDF compilado) tratado: fica fora da interpretação, com citação pendente. Não tratado (rodapé "Leis.org/aneel" e número de página dentro do dispositivo, sumário colado na ementa, "1. ......", rodapé web, hifenização, cabeçalho repetido, duas colunas, HTML que quebra linha em cada tag e separa "Art." do número).
 4. **Estrutura**: "art. N" minúsculo no início de linha corrigido (`art-minusculo`); ordinais 5o/5º/5°, validação de inciso romano, itens fora de anexos, caminhos duplicados e separação de epígrafe/ementa não tratados.
 5. **Blocos de alteração**: aspas aninhadas e "(NR)" tratados; falta fechar no próximo artigo próprio ou título, norma-alvo só pelo caput ("INDETERMINADO") e marcas explícitas de inclusão/revogação.
 6. **Tabelas**: marcador "Tabela N" existe; unidade anterior ainda engole a tabela seguinte (itens 23-G/23-H) e não há reconstrução de células.

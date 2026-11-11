@@ -55,6 +55,8 @@ def rule_candidates(extraction):
     for unit in units:
         if not unit["text"].strip() or unit["kind"] in {"formula", "table", "heading"}:
             continue
+        if unit.get("struck") == "revoked":
+            continue  # redação revogada no texto compilado: nunca vira obrigação
         if re.search(r"ignore.{0,40}instru|system prompt", unit["text"], re.I):
             continue
         parent = by_id.get(unit["parent"])

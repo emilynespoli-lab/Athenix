@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pdfplumber
 
-from ..structure import from_pieces, independent_source
+from ..structure import from_pieces, independent_source, struck_runs
 
 FAITHFUL, UNCERTAIN, MISSING, REVIEW = "faithful", "uncertain", "not_extracted", "needs_review"
 _RANK = {FAITHFUL: 0, UNCERTAIN: 1, REVIEW: 2, MISSING: 3}
@@ -86,7 +86,7 @@ def _ocr_tables(number, lines):
 def read_pdf(path, settings, ocr=None):
     """`ocr`: {página: lista de linhas | {"lines", "review", "ocr_score"}} ou None. Dicionário puro."""
     content, document = identify(path)
-    pieces, pages, tables, links, offset = [], [], [], [], 0
+    pieces, pages, tables, links, offset, struck = [], [], [], [], 0, []
     try:
         pdf = pdfplumber.open(io.BytesIO(content))
     except Exception as error:
@@ -156,6 +156,7 @@ def read_pdf(path, settings, ocr=None):
                     }
                 )
             pieces.append(text)
+            struck.append(struck_runs(page) if source == "text_layer" else [])
             pages.append(
                 {
                     "number": number,
@@ -178,7 +179,9 @@ def read_pdf(path, settings, ocr=None):
     if any(p["source"] == "ocr" for p in pages):
         warnings.append("Texto de OCR não tem segunda leitura: suas citações ficam pendentes.")
     source = independent_source(content, "application/pdf")
-    extraction = from_pieces(pieces, links, warnings, extractor, settings, source=source)
+    extraction = from_pieces(
+        pieces, links, warnings, extractor, settings, source=source, struck=struck
+    )
     return {"document": document, "pages": pages, "tables": tables, "extraction": extraction}
 
 
