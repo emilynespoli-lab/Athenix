@@ -127,14 +127,18 @@ def deterministic_items(doc, extraction, pages):
             )
         )
         for deadline in result["deadlines"]:
+            # O prazo pertence ao dispositivo onde está escrito: alíneas que herdam o caput não o
+            # repetem (mesmo id → _unique descarta as cópias).
+            owner = by_id[deadline["unit_id"]]
+            own_anchors = [a for a in result["anchors"] if a["unit_id"] == owner["id"]]
             items.append(
                 _item(
                     doc,
                     extraction,
                     pages,
-                    unit,
+                    owner,
                     "deadline",
-                    result["anchors"],
+                    own_anchors,
                     deadline,
                     [],
                     "rules",
@@ -144,7 +148,7 @@ def deterministic_items(doc, extraction, pages):
                         [
                             doc["sha256"],
                             "deadline",
-                            unit["start"],
+                            owner["start"],
                             deadline["quote"],
                             deadline["quantity"],
                         ]

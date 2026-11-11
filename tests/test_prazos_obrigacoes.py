@@ -3,11 +3,31 @@
 import pytest
 
 from athenix.config import Settings
+from athenix.poc import reader
+from athenix.poc.semantic import deterministic_items
 from athenix.structure import act_dates, extract
 from athenix.temporal import landmark, rules
-from scripts.avaliar import sources
+from scripts.avaliar import quality, sources
 
 PUB = [{"kind": "publication", "date": "2024-06-21"}]
+REN_SHA256 = "4a581592e981158bb9a9ebbbed10a019d3c06399fd2890389bf88f3609cc5887"
+
+
+@pytest.fixture(scope="module")
+def ren():
+    doc = sources()["ren20251137"]
+    assert doc["sha256"] == REN_SHA256
+    read = reader.read_pdf(doc["path"], Settings())
+    items, _ = deterministic_items(read["document"], read["extraction"], read["pages"])
+    return read, items
+
+
+def test_inherited_deadline_counted_once(ren):
+    _, items = ren
+    # Antes: alíneas a)–m) do item 132 repetiam os 60 dias do caput (12 prazos duplicados).
+    assert quality(items)["prazos_duplicados"] == 0
+    sixty = [i for i in items if i["type"] == "deadline" and i["interpretation"]["quantity"] == 60]
+    assert len({i["locator"]["unit_id"] for i in sixty}) == len(sixty)
 
 
 @pytest.mark.parametrize(
