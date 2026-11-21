@@ -63,7 +63,7 @@ plantada detectada pelo verificador.
 ## Divergências entre documentos (para decisão do titular)
 
 - `docs/execucao.md` diz que o PDF oficial da norma não foi obtido; agora há dois PDFs em `tests/norma_poc/`.
-- `docs/arquitetura.md` afirma "sem OCR"; a PoC adiciona OCR opcional (Docling, fora do CI).
+- `docs/arquitetura_plataforma.md` (antes `docs/arquitetura.md`) afirma "sem OCR"; a PoC adiciona OCR opcional (Docling, fora do CI).
 - Limite de upload de 10 MiB (`Settings.max_bytes`) rejeitaria `dou.pdf` (12,9 MB) pela aplicação web; a PoC lê do disco e não passa por esse limite.
 - O repositório traz `LICENSE` (PolyForm Noncommercial License 1.0.0, Copyright (c) 2026 Athenix), coerente com `docs/execucao.md` e o README.
 

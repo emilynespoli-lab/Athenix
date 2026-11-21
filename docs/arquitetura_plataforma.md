@@ -1,4 +1,7 @@
-# Arquitetura implementável
+# Arquitetura da plataforma (desenho de 04/11/2026)
+
+> Desenho da plataforma web (banco, fila, trilha, decisão humana). O fluxo do plano de ação, com os
+> módulos atuais, está em [ARQUITETURA.md](ARQUITETURA.md).
 
 Decisão de 04/11/2026: monólito modular Python 3.11+, FastAPI, Jinja2, SQLAlchemy, migrações versionadas, pdfplumber e PostgreSQL como banco de implantação. SQLite serve à operação local deste ambiente; não comprova semântica de concorrência do PostgreSQL.
 
